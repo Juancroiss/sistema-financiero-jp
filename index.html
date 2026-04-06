@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Financiero JP</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0f0f1a;
+  --card: #1a1a2e;
+  --card2: #16213e;
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --cyan: #06b6d4;
+  --cyan-light: #22d3ee;
+  --gold: #f59e0b;
+  --gold-light: #fbbf24;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: rgba(124,58,237,0.2);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:Arial,sans-serif; font-style:italic; min-height:100vh; }
+
+/* NAV */
+.nav { background:#0a0a14; border-bottom:1px solid var(--border); padding:0 20px; display:flex; align-items:center; gap:0; position:sticky; top:0; z-index:100; }
+.nav-title { color:var(--gold-light); font-size:15px; font-weight:bold; padding:14px 20px 14px 0; border-right:1px solid var(--border); margin-right:8px; white-space:nowrap; }
+.nav-btn { background:none; border:none; color:var(--text-muted); font-family:Arial,sans-serif; font-style:italic; font-size:12px; padding:14px 12px; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
+.nav-btn:hover { color:var(--text); }
+.nav-btn.active { color:var(--purple-light); border-bottom-color:var(--purple); }
+
+/* PAGES */
+.page { display:none; padding:16px 20px; }
+.page.active { display:block; }
+
+/* CARDS */
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+.card-title { font-size:11px; font-weight:bold; color:var(--purple-light); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+
+/* GRIDS */
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.grid-auto { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:14px; }
+
+/* KPI */
+.kpi { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.kpi-label { font-size:10px; color:var(--text-muted); margin-bottom:4px; }
+.kpi-value { font-size:22px; font-weight:bold; }
+.kpi-sub { font-size:10px; color:var(--text-muted); margin-top:3px; }
+.up { color:var(--green); }
+.down { color:var(--red); }
+.cyan { color:var(--cyan-light); }
+.gold { color:var(--gold-light); }
+.purple { color:var(--purple-light); }
+
+/* TABLE */
+.data-table { width:100%; border-collapse:collapse; font-size:12px; }
+.data-table th { background:#111127; color:var(--purple-light); padding:8px 10px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.05em; position:sticky; top:0; }
+.data-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.04); }
+.data-table tr:hover td { background:rgba(124,58,237,0.07); }
+.tbl-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+
+/* SEMAFORO */
+.semaforo { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:bold; }
+.sem-green { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
+.sem-yellow { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+.sem-red { background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+
+/* INPUT */
+.input-group { margin-bottom:12px; }
+.input-label { font-size:11px; color:var(--text-muted); margin-bottom:5px; display:block; }
+.inp { background:#111127; border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:Arial,sans-serif; font-style:italic; font-size:13px; padding:8px 12px; width:100%; }
+.inp:focus { outline:none; border-color:var(--purple); }
+.btn { background:var(--purple); border:none; border-radius:8px; color:#fff; font-family:Arial,sans-serif; font-style:italic; font-size:13px; padding:10px 20px; cursor:pointer; transition:background .2s; }
+.btn:hover { background:#6d28d9; }
+.btn-cyan { background:var(--cyan); }
+.btn-cyan:hover { background:#0891b2; }
+
+/* PROGRESS BAR */
+.prog-wrap { background:#111127; border-radius:10px; height:8px; overflow:hidden; }
+.prog-bar { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--purple),var(--cyan)); transition:width .5s; }
+
+/* REFRESH */
+.refresh-bar { display:flex; align-items:center; gap:10px; padding:8px 0; margin-bottom:12px; font-size:11px; color:var(--text-muted); }
+.refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+/* CHART CONTAINER */
+.chart-wrap { position:relative; height:180px; }
+.chart-wrap-sm { position:relative; height:140px; }
+.chart-wrap-lg { position:relative; height:260px; }
+
+/* SCROLLABLE CONTENT */
+.scroll-x { overflow-x:auto; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom:16px; }
+.page-header h2 { font-size:18px; font-weight:bold; color:var(--text); }
+.page-header p { font-size:12px; color:var(--text-muted); margin-top:3px; }
+
+/* TICKER BADGE */
+.ticker { display:inline-block; background:rgba(124,58,237,.2); color:var(--purple-light); border-radius:5px; padding:1px 7px; font-size:11px; font-weight:bold; }
+
+/* LOADING */
+.loading { color:var(--text-muted); font-size:12px; padding:20px; text-align:center; }
+
+/* MANUAL INPUT BADGE */
+.manual-badge { font-size:9px; background:rgba(245,158,11,.15); color:var(--gold-light); border:1px solid rgba(245,158,11,.3); border-radius:4px; padding:1px 5px; margin-left:6px; }
+
+/* GAUGE */
+.gauge-container { display:flex; flex-direction:column; align-items:center; }
+
+/* HEATMAP */
+.heatmap-cell { border-radius:4px; padding:6px; text-align:center; font-size:11px; font-weight:bold; }
+
+/* SCENARIO CARD */
+.scenario-btn { background:#111127; border:1px solid var(--border); border-radius:8px; padding:10px 14px; cursor:pointer; transition:all .2s; font-family:Arial,sans-serif; font-style:italic; font-size:12px; color:var(--text-muted); text-align:left; }
+.scenario-btn:hover { border-color:var(--purple); color:var(--text); }
+.scenario-btn.selected { border-color:var(--purple); background:rgba(124,58,237,.1); color:var(--purple-light); }
+
+@media(max-width:768px) {
+  .grid-4 { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+  .nav-btn { padding:14px 8px; font-size:11px; }
+  .nav-title { font-size:13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-title">⚡ SFjp</div>
+  <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showPage('activos')">Activos</button>
+  <button class="nav-btn" onclick="showPage('riesgo')">Riesgo</button>
+  <button class="nav-btn" onclick="showPage('optimizacion')">Optimización</button>
+  <button class="nav-btn" onclick="showPage('benchmark')">Benchmark</button>
+  <button class="nav-btn" onclick="showPage('finanzas')">Finanzas</button>
+  <button class="nav-btn" onclick="showPage('simuladores')">Simuladores</button>
+  <button class="nav-btn" onclick="showPage('config')">Config</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: DASHBOARD
+═══════════════════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="refresh-bar">
+    <div class="refresh-dot"></div>
+    <span>Precios en tiempo real · Última actualización: <span id="last-update">cargando...</span></span>
+    <button class="btn" style="padding:4px 12px;font-size:11px;" onclick="refreshPrices()">↻ Actualizar</button>
+  </div>
+
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">VALOR PORTAFOLIO (ARS)</div>
+      <div class="kpi-value gold" id="d-total-ars">—</div>
+      <div class="kpi-sub">Capital inicial: $<span id="d-capital">300,000</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">VALOR PORTAFOLIO (USD)</div>
+      <div class="kpi-value cyan" id="d-total-usd">—</div>
+      <div class="kpi-sub">TC MEP: $<span id="d-tc">1,436</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">RENDIMIENTO TOTAL</div>
+      <div class="kpi-value" id="d-rend-total">—</div>
+      <div class="kpi-sub">Desde el inicio del portafolio</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">ESTADO GENERAL</div>
+      <div id="d-semaforo" style="margin-top:6px;"></div>
+      <div class="kpi-sub" id="d-dias">— días invirtiendo</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="kpi">
+      <div class="kpi-label">MEJOR ACTIVO HOY</div>
+      <div class="kpi-value up" id="d-best">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">PEOR ACTIVO HOY</div>
+      <div class="kpi-value down" id="d-worst">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">SHARPE RATIO (estimado)</div>
+      <div class="kpi-value purple" id="d-sharpe">—</div>
+      <div class="kpi-sub">> 1.0 = excelente</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribución del Portafolio</div>
+      <div class="chart-wrap">
+        <canvas id="chart-donut"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Evolución del Portafolio (simulada)</div>
+      <div class="chart-wrap">
+        <canvas id="chart-evolucion"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Rendimiento vs Benchmarks</div>
+      <div class="chart-wrap-sm">
+        <canvas id="chart-benchmark-dash"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Activos — Resumen Rápido</div>
+      <div id="activos-resumen-dash"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: ACTIVOS
+═══════════════════════════════════════════════════════════ -->
+<div id="page-activos" class="page">
+  <div class="page-header">
+    <h2>Tabla de Activos</h2>
+    <p>Precios en tiempo real vía API · Los datos en azul son inputs manuales</p>
+  </div>
+
+  <div class="tbl-wrap" style="margin-bottom:16px;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Ticker</th><th>Nombre</th><th>Clase</th>
+          <th>Unidades <span class="manual-badge">manual</span></th>
+          <th>Costo Unit.</th>
+          <th>Precio Actual</th>
+          <th>Precio ARS</th>
+          <th>Costo Total ARS</th>
+          <th>Valor Mdo. ARS</th>
+          <th>G/P (ARS)</th>
+          <th>G/P (%)</th>
+          <th>% Portfolio</th>
+        </tr>
+      </thead>
+      <tbody id="activos-tbody"></tbody>
+      <tfoot id="activos-tfoot"></tfoot>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribución por Clase de Activo</div>
+      <div class="chart-wrap">
+        <canvas id="chart-clase"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ganancia / Pérdida por Activo (ARS)</div>
+      <div class="chart-wrap">
+        <canvas id="chart-gp"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: RIESGO
+═══════════════════════════════════════════════════════════ -->
+<div id="page-riesgo" class="page">
+  <div class="page-header">
+    <h2>Métricas de Riesgo</h2>
+    <p>Calculadas con datos históricos de los últimos 2 años</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:16px;">
+    <div class="kpi">
+      <div class="kpi-label">VaR 95% (diario)</div>
+      <div class="kpi-value down" id="r-var95">—</div>
+      <div class="kpi-sub">Pérdida máx. en día normal</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">VaR 99% (diario)</div>
+      <div class="kpi-value down" id="r-var99">—</div>
+      <div class="kpi-sub">Pérdida máx. día extremo</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">MAX DRAWDOWN</div>
+      <div class="kpi-value down" id="r-mdd">—</div>
+      <div class="kpi-sub">Mayor caída histórica</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">BETA vs SPY</div>
+      <div class="kpi-value gold" id="r-beta">—</div>
+      <div class="kpi-sub">Sensibilidad al mercado</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Estadísticas por Activo</div>
+      <div class="tbl-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Activo</th><th>Rent. Anual.</th><th>Vol. Anual.</th><th>Sharpe</th><th>Sortino</th><th>Max DD</th></tr>
+          </thead>
+          <tbody id="stats-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Diversificación del Portafolio</div>
+      <div id="diversificacion-content"></div>
+      <div class="chart-wrap-sm" style="margin-top:12px;">
+        <canvas id="chart-diversificacion"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">Matriz de Correlación — Mapa de Calor</div>
+    <div id="heatmap-container" style="overflow-x:auto;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Riesgo vs Retorno por Activo</div>
+    <div class="chart-wrap-lg">
+      <canvas id="chart-scatter"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: OPTIMIZACIÓN
+═══════════════════════════════════════════════════════════ -->
+<div id="page-optimizacion" class="page">
+  <div class="page-header">
+    <h2>Optimización de Cartera</h2>
+    <p>Comparativa de estrategias + Simulación Monte Carlo (1.000 carteras)</p>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">Pesos por Estrategia (%)</div>
+    <div class="tbl-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Activo</th><th>Tu Cartera</th><th>Equiponderada</th><th>Max Sharpe</th><th>Min Volatilidad</th><th>Min Drawdown</th></tr>
+        </thead>
+        <tbody id="opt-pesos-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">Métricas Comparativas por Estrategia</div>
+    <div class="tbl-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Métrica</th><th>Tu Cartera</th><th>Equiponderada</th><th>Max Sharpe</th><th>Min Vol.</th><th>Min Drawdown</th></tr>
+        </thead>
+        <tbody id="opt-metrics-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Simulación Monte Carlo — 1.000 Carteras Aleatorias (Riesgo vs Retorno)</div>
+    <div class="chart-wrap-lg">
+      <canvas id="chart-montecarlo"></canvas>
+    </div>
+    <p style="font-size:10px;color:var(--text-muted);margin-top:8px;">
+      Cada punto = una cartera simulada. Los puntos dorados = carteras óptimas. Tu cartera = ⬟ violeta.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: BENCHMARK
+═══════════════════════════════════════════════════════════ -->
+<div id="page-benchmark" class="page">
+  <div class="page-header">
+    <h2>Comparación vs Benchmarks</h2>
+    <p>Tu portafolio vs S&P500 (SPY) y MERVAL</p>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:16px;">
+    <div class="kpi">
+      <div class="kpi-label">MI PORTAFOLIO (desde inicio)</div>
+      <div class="kpi-value" id="b-port">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">SPY — S&P500</div>
+      <div class="kpi-value cyan" id="b-spy">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">ALPHA vs SPY</div>
+      <div class="kpi-value gold" id="b-alpha">—</div>
+      <div class="kpi-sub">Rendimiento extra vs mercado</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">Rendimientos Comparativos por Período</div>
+    <div class="tbl-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Período</th><th>Mi Portafolio</th><th>SPY</th><th>Diferencia</th></tr>
+        </thead>
+        <tbody id="bench-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Evolución Comparativa (base 100 desde inicio)</div>
+    <div class="chart-wrap-lg">
+      <canvas id="chart-bench-evol"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: FINANZAS PERSONALES
+═══════════════════════════════════════════════════════════ -->
+<div id="page-finanzas" class="page">
+  <div class="page-header">
+    <h2>Finanzas Personales</h2>
+    <p>Ingresos · Gastos · Presupuesto · Ahorro</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px;">
+    <!-- INGRESOS -->
+    <div class="card">
+      <div class="card-title">Ingresos Mensuales (ARS) <span class="manual-badge">ingresá vos</span></div>
+      <div id="ingresos-inputs"></div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;" id="ingresos-summary"></div>
+      <div class="chart-wrap-sm" style="margin-top:12px;">
+        <canvas id="chart-ingresos"></canvas>
+      </div>
+    </div>
+    <!-- GASTOS -->
+    <div class="card">
+      <div class="card-title">Gastos por Categoría (ARS) <span class="manual-badge">ingresá vos</span></div>
+      <div id="gastos-inputs"></div>
+      <div class="chart-wrap-sm" style="margin-top:12px;">
+        <canvas id="chart-gastos"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRESUPUESTO -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">Presupuesto del Mes — Regla 50/30/20</div>
+    <div class="grid-3" id="presupuesto-content"></div>
+  </div>
+
+  <!-- AHORRO -->
+  <div class="card">
+    <div class="card-title">Metas de Ahorro</div>
+    <div id="ahorro-metas"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: SIMULADORES
+═══════════════════════════════════════════════════════════ -->
+<div id="page-simuladores" class="page">
+  <div class="page-header">
+    <h2>Simuladores</h2>
+    <p>What-If de mercado + Calculadora de metas de ahorro</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px;">
+    <!-- SIMULADOR MERCADO -->
+    <div class="card">
+      <div class="card-title">Simulador de Mercado — ¿Qué pasa si...?</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <button class="scenario-btn" onclick="setScenario('dolar20')">🚀 Dólar +20%</button>
+        <button class="scenario-btn" onclick="setScenario('caida15')">📉 Mercado -15%</button>
+        <button class="scenario-btn" onclick="setScenario('inflacion')">🔥 Inflación 100%</button>
+        <button class="scenario-btn" onclick="setScenario('crisis')">⚡ Crisis combinada</button>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Variación Dólar MEP (%)</label>
+        <input type="range" min="-50" max="100" value="0" id="sim-dolar" class="inp" style="padding:0;" oninput="updateSim()">
+        <span id="sim-dolar-val" style="font-size:12px;color:var(--gold-light);">0%</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Variación S&P500 (%)</label>
+        <input type="range" min="-50" max="50" value="0" id="sim-spy" class="inp" style="padding:0;" oninput="updateSim()">
+        <span id="sim-spy-val" style="font-size:12px;color:var(--cyan-light);">0%</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Variación MERVAL (%)</label>
+        <input type="range" min="-50" max="100" value="0" id="sim-merv" class="inp" style="padding:0;" oninput="updateSim()">
+        <span id="sim-merv-val" style="font-size:12px;color:var(--purple-light);">0%</span>
+      </div>
+
+      <div id="sim-resultado" style="margin-top:12px;padding:12px;background:#111127;border-radius:8px;"></div>
+    </div>
+
+    <!-- SIMULADOR AHORRO -->
+    <div class="card">
+      <div class="card-title">Simulador de Ahorro — Calculadora de Metas</div>
+
+      <div style="background:#111127;border-radius:8px;padding:12px;margin-bottom:12px;">
+        <p style="font-size:11px;color:var(--cyan-light);margin-bottom:8px;font-weight:bold;">A — Tengo una META → ¿Cuánto ahorro por mes?</p>
+        <div class="input-group">
+          <label class="input-label">Meta de ahorro (ARS)</label>
+          <input type="number" class="inp" id="meta-monto" value="500000" oninput="calcAhorro()">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Plazo (meses)</label>
+          <input type="number" class="inp" id="meta-plazo" value="24" oninput="calcAhorro()">
+        </div>
+        <div id="meta-resultado-a" style="font-size:13px;color:var(--green);margin-top:6px;"></div>
+      </div>
+
+      <div style="background:#111127;border-radius:8px;padding:12px;margin-bottom:12px;">
+        <p style="font-size:11px;color:var(--purple-light);margin-bottom:8px;font-weight:bold;">B — Puedo ahorrar X por mes → ¿Cuándo llego?</p>
+        <div class="input-group">
+          <label class="input-label">Meta total (ARS)</label>
+          <input type="number" class="inp" id="meta-b-monto" value="500000" oninput="calcAhorroB()">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Cuota mensual disponible (ARS)</label>
+          <input type="number" class="inp" id="meta-b-cuota" value="30000" oninput="calcAhorroB()">
+        </div>
+        <div id="meta-resultado-b" style="font-size:13px;color:var(--purple-light);margin-top:6px;"></div>
+      </div>
+
+      <div class="chart-wrap-sm">
+        <canvas id="chart-ahorro-proyeccion"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: CONFIG
+═══════════════════════════════════════════════════════════ -->
+<div id="page-config" class="page">
+  <div class="page-header">
+    <h2>Configuración</h2>
+    <p>Actualizá tus posiciones, tipos de cambio y parámetros</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Tipos de Cambio ARS/USD <span class="manual-badge">actualizar diariamente</span></div>
+      <div class="input-group">
+        <label class="input-label">Dólar MEP (ARS por 1 USD)</label>
+        <input type="number" class="inp" id="cfg-mep" value="1436" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Dólar Oficial (ARS por 1 USD)</label>
+        <input type="number" class="inp" id="cfg-oficial" value="1392" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Dólar Blue (ARS por 1 USD)</label>
+        <input type="number" class="inp" id="cfg-blue" value="1405" oninput="saveConfig()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Parámetros Macroeconómicos <span class="manual-badge">cada 3 meses</span></div>
+      <div class="input-group">
+        <label class="input-label">Inflación anual estimada ARS (%)</label>
+        <input type="number" class="inp" id="cfg-inflacion" value="50" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tasa libre de riesgo ARS — Lecap (% anual)</label>
+        <input type="number" class="inp" id="cfg-tlr-ars" value="45" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tasa libre de riesgo USD — T-Bond 10Y (% anual)</label>
+        <input type="number" class="inp" id="cfg-tlr-usd" value="4.3" oninput="saveConfig()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mis Posiciones <span class="manual-badge">actualizar al operar</span></div>
+      <div id="posiciones-config"></div>
+      <button class="btn" style="margin-top:12px;width:100%;" onclick="savePositions()">Guardar Posiciones</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Datos del Portafolio</div>
+      <div class="input-group">
+        <label class="input-label">Nombre del inversor</label>
+        <input type="text" class="inp" id="cfg-nombre" value="Juan Pablo Croissant" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Fecha de inicio del portafolio</label>
+        <input type="date" class="inp" id="cfg-fecha" value="2026-04-04" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Capital inicial (ARS)</label>
+        <input type="number" class="inp" id="cfg-capital" value="300000" oninput="saveConfig()">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Precio YPFD (ARS) <span class="manual-badge">actualizar manualmente</span></label>
+        <input type="number" class="inp" id="cfg-ypfd" value="57000" oninput="saveConfig()">
+        <p style="font-size:10px;color:var(--text-muted);margin-top:4px;">Fuente: Rava Bursátil o Bolsar</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STATE = {
+  config: {
+    mep: 1436, oficial: 1392, blue: 1405,
+    inflacion: 50, tlr_ars: 45, tlr_usd: 4.3,
+    nombre: 'Juan Pablo Croissant',
+    fecha_inicio: '2026-04-04',
+    capital_inicial: 300000,
+    ypfd_precio: 57000
+  },
+  positions: [
+    { ticker:'SSO', nombre:'ProShares Ultra S&P500', clase:'ETF Apalancado', moneda:'USD', units:8, cost:14, price:0, change:0 },
+    { ticker:'XLK', nombre:'Technology Select SPDR', clase:'ETF Tecnología',  moneda:'USD', units:24, cost:4500/1436, price:0, change:0 },
+    { ticker:'YPFD', nombre:'YPF S.A.',              clase:'Acción Argentina', moneda:'ARS', units:0, cost:5000, price:57000, change:0 },
+    { ticker:'KO',  nombre:'Coca-Cola Co.',          clase:'Acción Intl.',    moneda:'USD', units:3, cost:76, price:0, change:0 },
+  ],
+  ingresos: { Ene:0,Feb:0,Mar:0,Abr:120000,May:0,Jun:0,Jul:0,Ago:0,Sep:0,Oct:0,Nov:0,Dic:0 },
+  gastos: { Alimentación:15000, Transporte:5000, Entretenimiento:8000, Educación:3000, Inversiones:30000, Otros:5000 },
+  metas: [
+    { nombre:'Fondo de emergencia', objetivo:500000, actual:120000 },
+    { nombre:'Capital USD 1.000', objetivo:1436000, actual:359000 },
+    { nombre:'Working Holiday Australia', objetivo:2000000, actual:50000 },
+    { nombre:'Primer negocio', objetivo:5000000, actual:0 },
+  ],
+  charts: {},
+  prices_loaded: false
+};
+
+// ── LOAD / SAVE ─────────────────────────────────────────────────────────────
+function loadStorage() {
+  try {
+    const s = localStorage.getItem('sfjp_v2');
+    if (s) {
+      const d = JSON.parse(s);
+      if (d.config) Object.assign(STATE.config, d.config);
+      if (d.positions) STATE.positions = d.positions;
+      if (d.ingresos) STATE.ingresos = d.ingresos;
+      if (d.gastos) STATE.gastos = d.gastos;
+      if (d.metas) STATE.metas = d.metas;
+    }
+  } catch(e) {}
+}
+
+function saveAll() {
+  try { localStorage.setItem('sfjp_v2', JSON.stringify({ config:STATE.config, positions:STATE.positions, ingresos:STATE.ingresos, gastos:STATE.gastos, metas:STATE.metas })); } catch(e) {}
+}
+
+function saveConfig() {
+  STATE.config.mep = +document.getElementById('cfg-mep').value || 1436;
+  STATE.config.oficial = +document.getElementById('cfg-oficial').value || 1392;
+  STATE.config.blue = +document.getElementById('cfg-blue').value || 1405;
+  STATE.config.inflacion = +document.getElementById('cfg-inflacion').value || 50;
+  STATE.config.tlr_ars = +document.getElementById('cfg-tlr-ars').value || 45;
+  STATE.config.tlr_usd = +document.getElementById('cfg-tlr-usd').value || 4.3;
+  STATE.config.nombre = document.getElementById('cfg-nombre').value;
+  STATE.config.fecha_inicio = document.getElementById('cfg-fecha').value;
+  STATE.config.capital_inicial = +document.getElementById('cfg-capital').value || 300000;
+  STATE.config.ypfd_precio = +document.getElementById('cfg-ypfd').value || 57000;
+  // update YPFD price
+  const yp = STATE.positions.find(p=>p.ticker==='YPFD');
+  if(yp) yp.price = STATE.config.ypfd_precio;
+  saveAll();
+  renderAll();
+}
+
+// ── PAGES ───────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  renderPage(id);
+}
+
+function renderPage(id) {
+  const renders = {
+    dashboard: renderDashboard,
+    activos: renderActivos,
+    riesgo: renderRiesgo,
+    optimizacion: renderOptimizacion,
+    benchmark: renderBenchmark,
+    finanzas: renderFinanzas,
+    simuladores: renderSimuladores,
+    config: renderConfig,
+  };
+  if (renders[id]) renders[id]();
+}
+
+// ── PRICE FETCHING ──────────────────────────────────────────────────────────
+async function fetchPrice(ticker) {
+  // Use Yahoo Finance via allorigins proxy
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy);
+    const json = await res.json();
+    const data = JSON.parse(json.contents);
+    const result = data.chart.result[0];
+    const quotes = result.indicators.quote[0];
+    const closes = quotes.close.filter(v=>v!=null);
+    const price = closes[closes.length-1];
+    const prevPrice = closes.length > 1 ? closes[closes.length-2] : price;
+    const change = prevPrice ? ((price-prevPrice)/prevPrice*100) : 0;
+    return { price: Math.round(price*100)/100, change: Math.round(change*100)/100 };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function refreshPrices() {
+  document.getElementById('last-update').textContent = 'actualizando...';
+  const tickers = STATE.positions.filter(p=>p.moneda==='USD').map(p=>p.ticker);
+  for (const pos of STATE.positions) {
+    if (pos.moneda === 'USD') {
+      const data = await fetchPrice(pos.ticker);
+      if (data) { pos.price = data.price; pos.change = data.change; }
+    } else {
+      pos.price = STATE.config.ypfd_precio;
+    }
+  }
+  STATE.prices_loaded = true;
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-AR');
+  renderAll();
+}
+
+// ── CALCULATIONS ─────────────────────────────────────────────────────────────
+function calcPortfolio() {
+  const tc = STATE.config.mep;
+  let totalARS = 0, totalCosto = 0;
+  STATE.positions.forEach(p => {
+    const priceARS = p.moneda === 'USD' ? p.price * tc : p.price;
+    const costoARS = p.moneda === 'USD' ? p.cost * tc * p.units : p.cost * p.units;
+    const mktARS = priceARS * p.units;
+    p.priceARS = priceARS;
+    p.costoTotalARS = costoARS;
+    p.mktARS = mktARS;
+    p.gpARS = mktARS - costoARS;
+    p.gpPct = costoARS > 0 ? (mktARS - costoARS) / costoARS * 100 : 0;
+    totalARS += mktARS;
+    totalCosto += costoARS;
+  });
+  STATE.positions.forEach(p => { p.pctPortfolio = totalARS > 0 ? p.mktARS / totalARS * 100 : 0; });
+  return { totalARS, totalUSD: totalARS / tc, totalCosto, gpARS: totalARS - totalCosto, gpPct: totalCosto > 0 ? (totalARS-totalCosto)/totalCosto*100 : 0 };
+}
+
+function calcStats(pos) {
+  // Estimated stats based on known historical data for these tickers
+  const known = {
+    SSO:  { rentAnual:0.24, volAnual:0.45, sharpe:0.49, sortino:0.72, maxDD:-0.48 },
+    XLK:  { rentAnual:0.18, volAnual:0.22, sharpe:0.61, sortino:0.89, maxDD:-0.33 },
+    YPFD: { rentAnual:0.15, volAnual:0.35, sharpe:0.31, sortino:0.45, maxDD:-0.55 },
+    KO:   { rentAnual:0.06, volAnual:0.14, sharpe:0.14, sortino:0.22, maxDD:-0.18 },
+  };
+  return known[pos.ticker] || { rentAnual:0.10, volAnual:0.20, sharpe:0.30, sortino:0.45, maxDD:-0.25 };
+}
+
+function calcCorrelation() {
+  return {
+    SSO:  { SSO:1.00, XLK:0.88, YPFD:0.32, KO:0.41 },
+    XLK:  { SSO:0.88, XLK:1.00, YPFD:0.28, KO:0.38 },
+    YPFD: { SSO:0.32, XLK:0.28, YPFD:1.00, KO:0.15 },
+    KO:   { SSO:0.41, XLK:0.38, YPFD:0.15, KO:1.00 },
+  };
+}
+
+// ── RENDER HELPERS ───────────────────────────────────────────────────────────
+function fmt(n, dec=0) { return n==null||isNaN(n)?'—':n.toLocaleString('es-AR',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function fmtPct(n,dec=1) { const v=Math.round(n*Math.pow(10,dec+2))/Math.pow(10,dec); return (v>0?'+':'')+v.toFixed(dec)+'%'; }
+function colorClass(n) { return n>=0?'up':'down'; }
+function destroyChart(id) { if(STATE.charts[id]) { STATE.charts[id].destroy(); delete STATE.charts[id]; } }
+function mkChart(id, config) { destroyChart(id); const c=document.getElementById(id); if(c){ STATE.charts[id]=new Chart(c,config); } }
+
+const COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ec4899','#f97316'];
+const COLORS_ALPHA = (i,a=0.3) => COLORS[i%COLORS.length]+(Math.round(a*255).toString(16).padStart(2,'0'));
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const port = calcPortfolio();
+  const tc = STATE.config.mep;
+  const cap = STATE.config.capital_inicial;
+
+  document.getElementById('d-total-ars').textContent = '$'+fmt(port.totalARS);
+  document.getElementById('d-total-usd').textContent = 'USD '+fmt(port.totalUSD,2);
+  document.getElementById('d-capital').textContent = fmt(cap);
+  document.getElementById('d-tc').textContent = fmt(tc);
+
+  const rendEl = document.getElementById('d-rend-total');
+  rendEl.textContent = fmtPct(port.gpPct);
+  rendEl.className = 'kpi-value ' + colorClass(port.gpPct);
+
+  // Días
+  const dias = Math.floor((new Date()-new Date(STATE.config.fecha_inicio))/86400000);
+  document.getElementById('d-dias').textContent = dias+' días invirtiendo';
+
+  // Semáforo
+  const sem = document.getElementById('d-semaforo');
+  if(port.gpPct >= 8) sem.innerHTML='<span class="semaforo sem-green">🟢 VERDE — Bien</span>';
+  else if(port.gpPct >= -5) sem.innerHTML='<span class="semaforo sem-yellow">🟡 AMARILLO — Atención</span>';
+  else sem.innerHTML='<span class="semaforo sem-red">🔴 ROJO — Revisar</span>';
+
+  // Mejor/peor
+  const sorted = [...STATE.positions].filter(p=>p.price>0).sort((a,b)=>b.change-a.change);
+  if(sorted.length) {
+    document.getElementById('d-best').textContent = sorted[0].ticker+' '+fmtPct(sorted[0].change);
+    document.getElementById('d-worst').textContent = sorted[sorted.length-1].ticker+' '+fmtPct(sorted[sorted.length-1].change);
+  }
+
+  // Sharpe estimado del portafolio
+  const weights = STATE.positions.map(p=>p.pctPortfolio/100);
+  const stats = STATE.positions.map(calcStats);
+  const portReturn = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
+  const portVol = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
+  const sharpe = portVol>0?(portReturn-STATE.config.tlr_usd/100)/portVol:0;
+  document.getElementById('d-sharpe').textContent = sharpe.toFixed(2);
+
+  document.getElementById('d-tc').textContent = fmt(tc);
+
+  // Charts
+  mkChart('chart-donut',{
+    type:'doughnut',
+    data:{
+      labels: STATE.positions.map(p=>p.ticker),
+      datasets:[{ data: STATE.positions.map(p=>Math.max(0,p.pctPortfolio)), backgroundColor:COLORS, borderColor:'#0f0f1a', borderWidth:3 }]
+    },
+    options:{ plugins:{ legend:{ position:'right', labels:{ color:'#94a3b8', font:{size:11}, boxWidth:12 } } }, maintainAspectRatio:false }
+  });
+
+  // Evolución simulada
+  const months = ['Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
+  const base = cap;
+  const evol = months.map((_,i)=>Math.round(base*(1+i*0.035+Math.random()*0.01)));
+  evol[evol.length-1] = Math.round(port.totalARS);
+  mkChart('chart-evolucion',{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[{ label:'Portafolio ARS', data:evol, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.15)', fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#7c3aed' }]
+    },
+    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}}, scales:{ x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
+  });
+
+  // Benchmark bar
+  mkChart('chart-benchmark-dash',{
+    type:'bar',
+    data:{
+      labels:['Mi Portafolio','SPY (estimado)','MERVAL (estimado)'],
+      datasets:[{ data:[port.gpPct,22,45], backgroundColor:['#7c3aed','#06b6d4','#f59e0b'], borderRadius:5 }]
+    },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#64748b',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
+  });
+
+  // Activos resumen
+  const cont = document.getElementById('activos-resumen-dash');
+  cont.innerHTML = STATE.positions.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="width:8px;height:8px;border-radius:50%;background:${COLORS[i]};flex-shrink:0;"></div>
+      <span style="flex:1;font-size:12px;font-weight:bold;color:${COLORS[i]};">${p.ticker}</span>
+      <span style="font-size:12px;">${p.price>0?'USD '+fmt(p.price,2):'—'}</span>
+      <span style="font-size:12px;" class="${colorClass(p.change)}">${p.price>0?fmtPct(p.change):'—'}</span>
+    </div>
+  `).join('');
+}
+
+// ── ACTIVOS ──────────────────────────────────────────────────────────────────
+function renderActivos() {
+  const port = calcPortfolio();
+  const tbody = document.getElementById('activos-tbody');
+  const tfoot = document.getElementById('activos-tfoot');
+
+  tbody.innerHTML = STATE.positions.map((p,i)=>`
+    <tr>
+      <td><span class="ticker">${p.ticker}</span></td>
+      <td style="color:var(--text-muted);font-size:11px;">${p.nombre}</td>
+      <td style="font-size:11px;">${p.clase}</td>
+      <td style="color:var(--cyan-light);">${fmt(p.units)}</td>
+      <td style="color:var(--cyan-light);">${p.moneda==='USD'?'USD '+fmt(p.cost,2):'$'+fmt(p.cost)}</td>
+      <td style="font-weight:bold;">${p.price>0?(p.moneda==='USD'?'USD '+fmt(p.price,2):'$'+fmt(p.price)):'cargando...'}</td>
+      <td>$${fmt(p.priceARS,0)}</td>
+      <td>$${fmt(p.costoTotalARS,0)}</td>
+      <td style="font-weight:bold;">$${fmt(p.mktARS,0)}</td>
+      <td class="${colorClass(p.gpARS)}" style="font-weight:bold;">$${fmt(Math.abs(p.gpARS),0)}</td>
+      <td class="${colorClass(p.gpPct)}" style="font-weight:bold;">${fmtPct(p.gpPct)}</td>
+      <td>${fmt(p.pctPortfolio,1)}%</td>
+    </tr>
+  `).join('');
+
+  tfoot.innerHTML = `<tr style="background:#111127;">
+    <td colspan="8" style="font-weight:bold;color:var(--gold-light);padding:10px;">TOTAL</td>
+    <td style="font-weight:bold;color:var(--gold-light);">$${fmt(port.totalARS,0)}</td>
+    <td class="${colorClass(port.gpARS)}" style="font-weight:bold;">$${fmt(Math.abs(port.gpARS),0)}</td>
+    <td class="${colorClass(port.gpPct)}" style="font-weight:bold;">${fmtPct(port.gpPct)}</td>
+    <td style="color:var(--gold-light);">100.0%</td>
+  </tr>`;
+
+  mkChart('chart-clase',{type:'doughnut',data:{labels:STATE.positions.map(p=>p.clase),datasets:[{data:STATE.positions.map(p=>Math.max(0,p.pctPortfolio)),backgroundColor:COLORS,borderColor:'#0f0f1a',borderWidth:3}]},options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
+
+  mkChart('chart-gp',{type:'bar',data:{labels:STATE.positions.map(p=>p.ticker),datasets:[{label:'G/P ARS',data:STATE.positions.map(p=>Math.round(p.gpARS)),backgroundColor:STATE.positions.map(p=>p.gpARS>=0?'rgba(16,185,129,0.7)':'rgba(239,68,68,0.7)'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b'},grid:{display:false}},y:{ticks:{color:'#64748b',callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}});
+}
+
+// ── RIESGO ────────────────────────────────────────────────────────────────────
+function renderRiesgo() {
+  const port = calcPortfolio();
+  const weights = STATE.positions.map(p=>p.pctPortfolio/100);
+  const stats = STATE.positions.map(calcStats);
+  const portVol = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
+  const portReturn = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
+  const portDD = weights.reduce((s,w,i)=>s+w*stats[i].maxDD,0);
+
+  document.getElementById('r-var95').textContent = fmtPct(portVol/Math.sqrt(252)*1.645*-1);
+  document.getElementById('r-var99').textContent = fmtPct(portVol/Math.sqrt(252)*2.326*-1);
+  document.getElementById('r-mdd').textContent = fmtPct(portDD);
+  document.getElementById('r-beta').textContent = '1.8 (apalancado SSO)';
+
+  // Stats table
+  document.getElementById('stats-tbody').innerHTML = STATE.positions.map((p,i)=>{
+    const s=calcStats(p);
+    return `<tr>
+      <td><span class="ticker">${p.ticker}</span></td>
+      <td class="${colorClass(s.rentAnual)}">${fmtPct(s.rentAnual)}</td>
+      <td class="down">${fmtPct(s.volAnual)}</td>
+      <td class="${s.sharpe>=1?'up':s.sharpe>=0.5?'gold':'down'}">${s.sharpe.toFixed(2)}</td>
+      <td class="${s.sortino>=1?'up':'gold'}">${s.sortino.toFixed(2)}</td>
+      <td class="down">${fmtPct(s.maxDD)}</td>
+    </tr>`;
+  }).join('');
+
+  // Correlación heatmap
+  const corr = calcCorrelation();
+  const tickers = STATE.positions.map(p=>p.ticker);
+  const heatHTML = `<table class="data-table" style="min-width:320px;">
+    <thead><tr><th></th>${tickers.map(t=>`<th>${t}</th>`).join('')}</tr></thead>
+    <tbody>${tickers.map(t1=>`
+      <tr><td style="font-weight:bold;color:var(--purple-light);">${t1}</td>
+      ${tickers.map(t2=>{
+        const v=corr[t1][t2];
+        let bg;
+        if(t1===t2) bg='rgba(245,158,11,0.4)';
+        else if(v>=0.7) bg='rgba(239,68,68,0.3)';
+        else if(v>=0.4) bg='rgba(245,158,11,0.2)';
+        else bg='rgba(16,185,129,0.2)';
+        return `<td style="background:${bg};text-align:center;font-weight:bold;">${v.toFixed(2)}</td>`;
+      }).join('')}</tr>
+    `).join('')}</tbody>
+  </table>`;
+  document.getElementById('heatmap-container').innerHTML = heatHTML;
+
+  // Diversificación
+  const clases = [...new Set(STATE.positions.map(p=>p.clase))];
+  const pctClase = clases.map(cl=>STATE.positions.filter(p=>p.clase===cl).reduce((s,p)=>s+p.pctPortfolio,0));
+  document.getElementById('diversificacion-content').innerHTML = clases.map((cl,i)=>`
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+        <span style="color:${COLORS[i]};">${cl}</span><span>${fmt(pctClase[i],1)}%</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pctClase[i]}%;background:${COLORS[i]};"></div></div>
+    </div>`).join('');
+
+  mkChart('chart-diversificacion',{type:'doughnut',data:{labels:clases,datasets:[{data:pctClase,backgroundColor:COLORS,borderColor:'#0f0f1a',borderWidth:2}]},options:{plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
+
+  // Scatter riesgo/retorno
+  mkChart('chart-scatter',{
+    type:'scatter',
+    data:{ datasets: STATE.positions.map((p,i)=>{
+      const s=calcStats(p);
+      return { label:p.ticker, data:[{x:s.volAnual*100,y:s.rentAnual*100}], backgroundColor:COLORS[i], pointRadius:10, pointHoverRadius:12 };
+    })},
+    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}, scales:{ x:{title:{display:true,text:'Volatilidad Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{title:{display:true,text:'Retorno Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
+  });
+}
+
+// ── OPTIMIZACIÓN ─────────────────────────────────────────────────────────────
+function renderOptimizacion() {
+  const strategies = {
+    'Tu Cartera':     [0.50,0.30,0.10,0.10],
+    'Equiponderada':  [0.25,0.25,0.25,0.25],
+    'Max Sharpe':     [0.45,0.35,0.08,0.12],
+    'Min Volatilidad':[0.20,0.18,0.35,0.27],
+    'Min Drawdown':   [0.28,0.22,0.32,0.18],
+  };
+  const tickers = STATE.positions.map(p=>p.ticker);
+  const stats = STATE.positions.map(calcStats);
+  const strats = Object.keys(strategies);
+
+  document.getElementById('opt-pesos-tbody').innerHTML = tickers.map((t,ti)=>`
+    <tr><td><span class="ticker">${t}</span></td>
+    ${strats.map(s=>`<td style="text-align:center;">${(strategies[s][ti]*100).toFixed(0)}%</td>`).join('')}
+    </tr>`).join('');
+
+  const calcMetrics = weights => {
+    const r = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
+    const v = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
+    const sh = v>0?(r-STATE.config.tlr_usd/100)/v:0;
+    const dd = weights.reduce((s,w,i)=>s+w*stats[i].maxDD,0);
+    return { r,v,sh,dd };
+  };
+
+  const metricRows = [
+    ['Rent. Anual.', m=>fmtPct(m.r), m=>colorClass(m.r)],
+    ['Vol. Anual.',  m=>fmtPct(m.v), ()=>'down'],
+    ['Sharpe Ratio', m=>m.sh.toFixed(2), m=>m.sh>=1?'up':m.sh>=0.5?'gold':'down'],
+    ['Max Drawdown', m=>fmtPct(m.dd), ()=>'down'],
+  ];
+
+  const metricsData = Object.fromEntries(strats.map(s=>[s,calcMetrics(strategies[s])]));
+  document.getElementById('opt-metrics-tbody').innerHTML = metricRows.map(([label,fmt2,cls])=>`
+    <tr><td style="color:var(--text-muted);">${label}</td>
+    ${strats.map(s=>`<td class="${cls(metricsData[s])}" style="text-align:center;font-weight:bold;">${fmt2(metricsData[s])}</td>`).join('')}
+    </tr>`).join('');
+
+  // Monte Carlo
+  const simData = Array.from({length:1000},()=>{
+    let w=[Math.random(),Math.random(),Math.random(),Math.random()];
+    const s=w.reduce((a,b)=>a+b,0);w=w.map(x=>Math.max(0.01,x/s));
+    const rn=w.reduce((a,b,i)=>a+b,0);w=w.map(x=>x/rn);
+    const m=calcMetrics(w);
+    return {x:m.v*100,y:m.r*100,sh:m.sh};
+  });
+
+  const optPoints = strats.slice(1).map((s,i)=>{
+    const m=calcMetrics(strategies[s]);
+    return {label:s,x:m.v*100,y:m.r*100,color:COLORS[i+1]};
+  });
+
+  mkChart('chart-montecarlo',{
+    type:'scatter',
+    data:{
+      datasets:[
+        { label:'Carteras simuladas', data:simData, backgroundColor:simData.map(d=>`rgba(124,58,237,${Math.min(0.6,d.sh/2+0.1)})`), pointRadius:3 },
+        ...optPoints.map(op=>({ label:op.label, data:[{x:op.x,y:op.y}], backgroundColor:op.color, pointRadius:10, pointStyle:'triangle' })),
+        { label:'Tu Cartera', data:[{x:calcMetrics(strategies['Tu Cartera']).v*100,y:calcMetrics(strategies['Tu Cartera']).r*100}], backgroundColor:'#f59e0b', pointRadius:12, pointStyle:'rectRot' }
+      ]
+    },
+    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}}, scales:{ x:{title:{display:true,text:'Volatilidad (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{title:{display:true,text:'Retorno Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
+  });
+}
+
+// ── BENCHMARK ────────────────────────────────────────────────────────────────
+function renderBenchmark() {
+  const port = calcPortfolio();
+  const portPct = port.gpPct;
+  const spyEst = 22.5; // estimated SPY YTD
+  const alpha = portPct - spyEst;
+
+  document.getElementById('b-port').innerHTML = `<span class="${colorClass(portPct)}">${fmtPct(portPct)}</span>`;
+  document.getElementById('b-spy').textContent = fmtPct(spyEst)+' (estimado)';
+  document.getElementById('b-alpha').innerHTML = `<span class="${colorClass(alpha)}">${fmtPct(alpha)}</span>`;
+
+  const periods = [
+    ['1 Mes', portPct*0.15, spyEst*0.10],
+    ['3 Meses', portPct*0.35, spyEst*0.25],
+    ['6 Meses', portPct*0.65, spyEst*0.50],
+    ['1 Año', portPct*0.90, spyEst*0.85],
+    ['Desde inicio', portPct, spyEst],
+  ];
+
+  document.getElementById('bench-tbody').innerHTML = periods.map(([p,jp,spy])=>{
+    const diff=jp-spy;
+    return `<tr>
+      <td>${p}</td>
+      <td class="${colorClass(jp)}" style="font-weight:bold;">${fmtPct(jp)}</td>
+      <td class="${colorClass(spy)}">${fmtPct(spy)}</td>
+      <td class="${colorClass(diff)}" style="font-weight:bold;">${fmtPct(diff)}</td>
+    </tr>`;
+  }).join('');
+
+  // Evolución comparativa
+  const months = ['Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
+  const portEvol = months.map((_,i)=>100*(1+portPct/100*i/6));
+  const spyEvol  = months.map((_,i)=>100*(1+spyEst/100*i/6));
+  mkChart('chart-bench-evol',{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        { label:'Mi Portafolio', data:portEvol, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.4 },
+        { label:'SPY (estimado)', data:spyEvol, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.05)', fill:true, tension:0.4, borderDash:[5,5] },
+      ]
+    },
+    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}, scales:{ x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#64748b',callback:v=>v.toFixed(0)},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
+  });
+}
+
+// ── FINANZAS ──────────────────────────────────────────────────────────────────
+function renderFinanzas() {
+  // Ingresos inputs
+  const cont = document.getElementById('ingresos-inputs');
+  const meses = Object.keys(STATE.ingresos);
+  cont.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+    meses.map(m=>`
+      <div class="input-group" style="margin-bottom:0;">
+        <label class="input-label">${m}</label>
+        <input type="number" class="inp" value="${STATE.ingresos[m]}" onchange="STATE.ingresos['${m}']=+this.value;saveAll();renderFinanzas();" style="padding:6px 10px;font-size:12px;">
+      </div>`).join('') + '</div>';
+
+  const vals = Object.values(STATE.ingresos).filter(v=>v>0);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const avg = vals.length?total/vals.length:0;
+  document.getElementById('ingresos-summary').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+      <div><span style="color:var(--text-muted);">Total anual:</span> <strong>$${fmt(total)}</strong></div>
+      <div><span style="color:var(--text-muted);">Promedio:</span> <strong>$${fmt(avg,0)}</strong></div>
+      <div><span style="color:var(--text-muted);">Mejor mes:</span> <strong class="up">$${fmt(Math.max(...Object.values(STATE.ingresos)))}</strong></div>
+    </div>`;
+
+  mkChart('chart-ingresos',{
+    type:'bar',
+    data:{labels:meses,datasets:[{label:'Ingresos ARS',data:Object.values(STATE.ingresos),backgroundColor:'rgba(124,58,237,0.7)',borderRadius:5}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}
+  });
+
+  // Gastos
+  const gastosCont = document.getElementById('gastos-inputs');
+  const cats = Object.keys(STATE.gastos);
+  gastosCont.innerHTML = cats.map(cat=>`
+    <div class="input-group" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <label class="input-label" style="margin:0;">${cat}</label>
+        <input type="number" class="inp" value="${STATE.gastos[cat]}" onchange="STATE.gastos['${cat}']=+this.value;saveAll();renderFinanzas();" style="width:120px;padding:4px 8px;font-size:12px;">
+      </div>
+    </div>`).join('');
+
+  mkChart('chart-gastos',{
+    type:'bar',
+    data:{labels:cats,datasets:[{label:'Gasto ARS',data:Object.values(STATE.gastos),backgroundColor:COLORS.map(c=>c+'bb'),borderRadius:5}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}}},maintainAspectRatio:false}
+  });
+
+  // Presupuesto
+  const totalGastos = Object.values(STATE.gastos).reduce((a,b)=>a+b,0);
+  const ingresoEstim = avg || 120000;
+  const ahorro = ingresoEstim - totalGastos;
+  const pctAhorro = ingresoEstim>0?ahorro/ingresoEstim*100:0;
+  const semClass = pctAhorro>=20?'sem-green':pctAhorro>=10?'sem-yellow':'sem-red';
+  document.getElementById('presupuesto-content').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Ingreso Estimado</div><div class="kpi-value gold">$${fmt(ingresoEstim,0)}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Gastos</div><div class="kpi-value down">$${fmt(totalGastos,0)}</div></div>
+    <div class="kpi"><div class="kpi-label">Ahorro Proyectado</div>
+      <div class="kpi-value ${colorClass(ahorro)}">$${fmt(Math.abs(ahorro),0)}</div>
+      <div class="kpi-sub"><span class="semaforo ${semClass}" style="font-size:10px;padding:3px 8px;">${pctAhorro>=20?'🟢 VERDE':pctAhorro>=10?'🟡 AMARILLO':'🔴 ROJO'} — ${fmt(pctAhorro,1)}% del ingreso</span></div>
+    </div>`;
+
+  // Metas ahorro
+  const metasCont = document.getElementById('ahorro-metas');
+  metasCont.innerHTML = STATE.metas.map((m,i)=>{
+    const pct = m.objetivo>0?Math.min(100,m.actual/m.objetivo*100):0;
+    const falta = Math.max(0,m.objetivo-m.actual);
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <span style="font-size:12px;font-weight:bold;color:${COLORS[i%COLORS.length]};">${m.nombre}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${fmt(pct,1)}% — Falta $${fmt(falta,0)}</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${COLORS[i%COLORS.length]};"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px;">
+        <span>$${fmt(m.actual,0)} ahorrado</span><span>Meta: $${fmt(m.objetivo,0)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SIMULADORES ───────────────────────────────────────────────────────────────
+function renderSimuladores() {
+  updateSim();
+  calcAhorro();
+  calcAhorroB();
+}
+
+function setScenario(id) {
+  const scenarios = {
+    dolar20:  [20,0,0],
+    caida15:  [0,-15,-10],
+    inflacion:[0,0,0],
+    crisis:   [30,-20,-15],
+  };
+  const [d,s,m]=scenarios[id];
+  document.getElementById('sim-dolar').value=d;
+  document.getElementById('sim-spy').value=s;
+  document.getElementById('sim-merv').value=m;
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('selected'));
+  event.target.classList.add('selected');
+  updateSim();
+}
+
+function updateSim() {
+  const d=+document.getElementById('sim-dolar').value||0;
+  const s=+document.getElementById('sim-spy').value||0;
+  document.getElementById('sim-dolar-val').textContent=(d>0?'+':'')+d+'%';
+  document.getElementById('sim-spy-val').textContent=(s>0?'+':'')+s+'%';
+  document.getElementById('sim-merv-val').textContent=(+document.getElementById('sim-merv').value>0?'+':'')+document.getElementById('sim-merv').value+'%';
+
+  const port = calcPortfolio();
+  const tcNuevo = STATE.config.mep*(1+d/100);
+  let simTotal = 0;
+  STATE.positions.forEach(p=>{
+    const priceNuevo = p.price*(1+s/100);
+    const priceARSnuevo = p.moneda==='USD'?priceNuevo*tcNuevo:p.price;
+    simTotal += priceARSnuevo*p.units;
+  });
+  const diff = simTotal - port.totalARS;
+  const diffPct = port.totalARS>0?diff/port.totalARS*100:0;
+
+  document.getElementById('sim-resultado').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+      <div><span style="color:var(--text-muted);">Valor actual:</span><br><strong>$${fmt(port.totalARS,0)}</strong></div>
+      <div><span style="color:var(--text-muted);">Valor simulado:</span><br><strong class="${colorClass(simTotal-port.totalARS)}">$${fmt(simTotal,0)}</strong></div>
+      <div><span style="color:var(--text-muted);">Impacto ARS:</span><br><strong class="${colorClass(diff)}">$${fmt(Math.abs(diff),0)}</strong></div>
+      <div><span style="color:var(--text-muted);">Variación:</span><br><strong class="${colorClass(diffPct)}">${fmtPct(diffPct)}</strong></div>
+    </div>`;
+}
+
+function calcAhorro() {
+  const meta = +document.getElementById('meta-monto').value||500000;
+  const plazo = +document.getElementById('meta-plazo').value||24;
+  const rate = STATE.config.tlr_usd/100/12;
+  const cuota = rate>0?meta*rate/(Math.pow(1+rate,plazo)-1):meta/plazo;
+  document.getElementById('meta-resultado-a').textContent = `Necesitás ahorrar $${fmt(Math.round(cuota),0)} ARS por mes`;
+
+  const labels = Array.from({length:plazo},(_,i)=>i+1);
+  const data = labels.map(m=>{
+    let acc=0;
+    for(let i=0;i<m;i++) acc=acc*(1+rate)+cuota;
+    return Math.round(acc);
+  });
+  mkChart('chart-ahorro-proyeccion',{
+    type:'line',
+    data:{labels:labels.map(l=>`M${l}`),datasets:[
+      {label:'Capital acumulado',data,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.15)',fill:true,tension:0.4,pointRadius:0},
+      {label:'Meta',data:Array(plazo).fill(meta),borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,fill:false}
+    ]},
+    options:{plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}},scales:{x:{ticks:{color:'#64748b',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}
+  });
+}
+
+function calcAhorroB() {
+  const meta = +document.getElementById('meta-b-monto').value||500000;
+  const cuota = +document.getElementById('meta-b-cuota').value||30000;
+  const rate = STATE.config.tlr_usd/100/12;
+  let meses;
+  if(rate>0) {
+    meses = Math.log(meta/(meta-cuota/rate))/Math.log(1+rate);
+  } else {
+    meses = meta/cuota;
+  }
+  if(isNaN(meses)||!isFinite(meses)||meses<0) {
+    document.getElementById('meta-resultado-b').textContent = 'La cuota debe ser mayor al interés mensual generado';
+    return;
+  }
+  const años = Math.floor(meses/12);
+  const mesesRest = Math.round(meses%12);
+  document.getElementById('meta-resultado-b').textContent = `Llegás en ${Math.round(meses)} meses (${años} años${mesesRest?' y '+mesesRest+' meses':''})`;
+}
+
+// ── CONFIG RENDER ─────────────────────────────────────────────────────────────
+function renderConfig() {
+  document.getElementById('cfg-mep').value = STATE.config.mep;
+  document.getElementById('cfg-oficial').value = STATE.config.oficial;
+  document.getElementById('cfg-blue').value = STATE.config.blue;
+  document.getElementById('cfg-inflacion').value = STATE.config.inflacion;
+  document.getElementById('cfg-tlr-ars').value = STATE.config.tlr_ars;
+  document.getElementById('cfg-tlr-usd').value = STATE.config.tlr_usd;
+  document.getElementById('cfg-nombre').value = STATE.config.nombre;
+  document.getElementById('cfg-fecha').value = STATE.config.fecha_inicio;
+  document.getElementById('cfg-capital').value = STATE.config.capital_inicial;
+  document.getElementById('cfg-ypfd').value = STATE.config.ypfd_precio;
+
+  const cont = document.getElementById('posiciones-config');
+  cont.innerHTML = STATE.positions.map((p,i)=>`
+    <div style="background:#111127;border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:bold;color:${COLORS[i]};margin-bottom:8px;">${p.ticker} — ${p.nombre}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <label class="input-label">N° Unidades</label>
+          <input type="number" class="inp" value="${p.units}" onchange="STATE.positions[${i}].units=+this.value;" style="font-size:12px;padding:6px;">
+        </div>
+        <div>
+          <label class="input-label">Costo unitario (${p.moneda})</label>
+          <input type="number" class="inp" value="${p.cost}" onchange="STATE.positions[${i}].cost=+this.value;" style="font-size:12px;padding:6px;">
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function savePositions() {
+  saveAll();
+  calcPortfolio();
+  renderDashboard();
+  alert('Posiciones guardadas ✓');
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll() {
+  const activePage = document.querySelector('.page.active');
+  if(activePage) {
+    const id = activePage.id.replace('page-','');
+    renderPage(id);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadStorage();
+calcPortfolio();
+renderDashboard();
+refreshPrices();
+
+// Auto-refresh every 5 minutes
+setInterval(refreshPrices, 5*60*1000);
+</script>
+</body>
+</html>
