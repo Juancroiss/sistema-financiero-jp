@@ -2,1327 +2,672 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Sistema Financiero JP</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg: #0f0f1a;
-  --card: #1a1a2e;
-  --card2: #16213e;
-  --purple: #7c3aed;
-  --purple-light: #a78bfa;
-  --cyan: #06b6d4;
-  --cyan-light: #22d3ee;
-  --gold: #f59e0b;
-  --gold-light: #fbbf24;
-  --green: #10b981;
-  --red: #ef4444;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --border: rgba(124,58,237,0.2);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:Arial,sans-serif; font-style:italic; min-height:100vh; }
-
-/* NAV */
-.nav { background:#0a0a14; border-bottom:1px solid var(--border); padding:0 20px; display:flex; align-items:center; gap:0; position:sticky; top:0; z-index:100; }
-.nav-title { color:var(--gold-light); font-size:15px; font-weight:bold; padding:14px 20px 14px 0; border-right:1px solid var(--border); margin-right:8px; white-space:nowrap; }
-.nav-btn { background:none; border:none; color:var(--text-muted); font-family:Arial,sans-serif; font-style:italic; font-size:12px; padding:14px 12px; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
-.nav-btn:hover { color:var(--text); }
-.nav-btn.active { color:var(--purple-light); border-bottom-color:var(--purple); }
-
-/* PAGES */
-.page { display:none; padding:16px 20px; }
-.page.active { display:block; }
-
-/* CARDS */
-.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
-.card-title { font-size:11px; font-weight:bold; color:var(--purple-light); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
-
-/* GRIDS */
-.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
-.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
-.grid-auto { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:14px; }
-
-/* KPI */
-.kpi { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
-.kpi-label { font-size:10px; color:var(--text-muted); margin-bottom:4px; }
-.kpi-value { font-size:22px; font-weight:bold; }
-.kpi-sub { font-size:10px; color:var(--text-muted); margin-top:3px; }
-.up { color:var(--green); }
-.down { color:var(--red); }
-.cyan { color:var(--cyan-light); }
-.gold { color:var(--gold-light); }
-.purple { color:var(--purple-light); }
-
-/* TABLE */
-.data-table { width:100%; border-collapse:collapse; font-size:12px; }
-.data-table th { background:#111127; color:var(--purple-light); padding:8px 10px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.05em; position:sticky; top:0; }
-.data-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.04); }
-.data-table tr:hover td { background:rgba(124,58,237,0.07); }
-.tbl-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
-
-/* SEMAFORO */
-.semaforo { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:bold; }
-.sem-green { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
-.sem-yellow { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
-.sem-red { background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.3); }
-
-/* INPUT */
-.input-group { margin-bottom:12px; }
-.input-label { font-size:11px; color:var(--text-muted); margin-bottom:5px; display:block; }
-.inp { background:#111127; border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:Arial,sans-serif; font-style:italic; font-size:13px; padding:8px 12px; width:100%; }
-.inp:focus { outline:none; border-color:var(--purple); }
-.btn { background:var(--purple); border:none; border-radius:8px; color:#fff; font-family:Arial,sans-serif; font-style:italic; font-size:13px; padding:10px 20px; cursor:pointer; transition:background .2s; }
-.btn:hover { background:#6d28d9; }
-.btn-cyan { background:var(--cyan); }
-.btn-cyan:hover { background:#0891b2; }
-
-/* PROGRESS BAR */
-.prog-wrap { background:#111127; border-radius:10px; height:8px; overflow:hidden; }
-.prog-bar { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--purple),var(--cyan)); transition:width .5s; }
-
-/* REFRESH */
-.refresh-bar { display:flex; align-items:center; gap:10px; padding:8px 0; margin-bottom:12px; font-size:11px; color:var(--text-muted); }
-.refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
-
-/* CHART CONTAINER */
-.chart-wrap { position:relative; height:180px; }
-.chart-wrap-sm { position:relative; height:140px; }
-.chart-wrap-lg { position:relative; height:260px; }
-
-/* SCROLLABLE CONTENT */
-.scroll-x { overflow-x:auto; }
-
-/* PAGE HEADER */
-.page-header { margin-bottom:16px; }
-.page-header h2 { font-size:18px; font-weight:bold; color:var(--text); }
-.page-header p { font-size:12px; color:var(--text-muted); margin-top:3px; }
-
-/* TICKER BADGE */
-.ticker { display:inline-block; background:rgba(124,58,237,.2); color:var(--purple-light); border-radius:5px; padding:1px 7px; font-size:11px; font-weight:bold; }
-
-/* LOADING */
-.loading { color:var(--text-muted); font-size:12px; padding:20px; text-align:center; }
-
-/* MANUAL INPUT BADGE */
-.manual-badge { font-size:9px; background:rgba(245,158,11,.15); color:var(--gold-light); border:1px solid rgba(245,158,11,.3); border-radius:4px; padding:1px 5px; margin-left:6px; }
-
-/* GAUGE */
-.gauge-container { display:flex; flex-direction:column; align-items:center; }
-
-/* HEATMAP */
-.heatmap-cell { border-radius:4px; padding:6px; text-align:center; font-size:11px; font-weight:bold; }
-
-/* SCENARIO CARD */
-.scenario-btn { background:#111127; border:1px solid var(--border); border-radius:8px; padding:10px 14px; cursor:pointer; transition:all .2s; font-family:Arial,sans-serif; font-style:italic; font-size:12px; color:var(--text-muted); text-align:left; }
-.scenario-btn:hover { border-color:var(--purple); color:var(--text); }
-.scenario-btn.selected { border-color:var(--purple); background:rgba(124,58,237,.1); color:var(--purple-light); }
-
-@media(max-width:768px) {
-  .grid-4 { grid-template-columns:repeat(2,1fr); }
-  .grid-3 { grid-template-columns:repeat(2,1fr); }
-  .nav-btn { padding:14px 8px; font-size:11px; }
-  .nav-title { font-size:13px; }
+:root{--bg:#0f0f1a;--card:#1a1a2e;--pur:#7c3aed;--pl:#a78bfa;--cy:#06b6d4;--cl:#22d3ee;--go:#f59e0b;--gl:#fbbf24;--gr:#10b981;--re:#ef4444;--tx:#f1f5f9;--mu:#94a3b8;--bd:rgba(124,58,237,0.2)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:Arial,sans-serif;font-style:italic;min-height:100vh;overflow-x:hidden}
+.nav{background:#0a0a14;border-bottom:1px solid var(--bd);padding:0 10px;display:flex;align-items:center;position:sticky;top:0;z-index:100;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.nav::-webkit-scrollbar{height:2px}.nav::-webkit-scrollbar-thumb{background:var(--pur)}
+.nt{color:var(--gl);font-size:14px;font-weight:bold;padding:12px 12px 12px 0;border-right:1px solid var(--bd);margin-right:6px;white-space:nowrap;flex-shrink:0}
+.nb{background:none;border:none;color:var(--mu);font-family:Arial,sans-serif;font-style:italic;font-size:12px;padding:12px 9px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.nb:hover{color:var(--tx)}.nb.active{color:var(--pl);border-bottom-color:var(--pur)}
+.pg{display:none;padding:12px 14px}.pg.active{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.ct{font-size:11px;font-weight:bold;color:var(--pl);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.kl{font-size:10px;color:var(--mu);margin-bottom:4px}
+.kv{font-size:20px;font-weight:bold}
+.ks{font-size:10px;color:var(--mu);margin-top:2px}
+.up{color:var(--gr)}.dn{color:var(--re)}.cy{color:var(--cl)}.go{color:var(--gl)}.pu{color:var(--pl)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:#111127;color:var(--pl);padding:7px 8px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tbl td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap}
+.tbl tr:hover td{background:rgba(124,58,237,0.07)}
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--bd);margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.sb{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:10px;font-size:11px;color:var(--mu);flex-wrap:wrap}
+.dl{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s infinite;flex-shrink:0}
+.ds{width:7px;height:7px;border-radius:50%;background:var(--cy);flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sem{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:bold}
+.sg{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.sy{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.sr{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.ig{margin-bottom:10px}
+.il{font-size:11px;color:var(--mu);margin-bottom:4px;display:block}
+.inp{background:#111127;border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:Arial,sans-serif;font-style:italic;font-size:13px;padding:7px 10px;width:100%}
+.inp:focus{outline:none;border-color:var(--pur)}
+select.inp option{background:#111127;color:var(--tx)}
+.btn{background:var(--pur);border:none;border-radius:8px;color:#fff;font-family:Arial,sans-serif;font-style:italic;font-size:13px;padding:9px 16px;cursor:pointer}
+.btn:hover{background:#6d28d9}
+.bsm{padding:4px 10px;font-size:10px}
+.bred{background:#dc2626}.bred:hover{background:#b91c1c}
+.bcy{background:var(--cy)}.bcy:hover{background:#0891b2}
+.pw{background:#111127;border-radius:10px;height:7px;overflow:hidden}
+.pb{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--pur),var(--cy));transition:width .5s}
+.cw{position:relative;height:180px}.cwsm{position:relative;height:130px}.cwlg{position:relative;height:250px}
+.tkr{display:inline-block;background:rgba(124,58,237,.2);color:var(--pl);border-radius:5px;padding:1px 6px;font-size:11px;font-weight:bold}
+.mb{font-size:9px;background:rgba(245,158,11,.15);color:var(--gl);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:1px 5px;margin-left:4px}
+.ab{font-size:9px;background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:1px 5px;margin-left:4px}
+.scb{background:#111127;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;cursor:pointer;font-family:Arial,sans-serif;font-style:italic;font-size:12px;color:var(--mu);text-align:left;width:100%}
+.scb:hover,.scb.sel{border-color:var(--pur);background:rgba(124,58,237,.1);color:var(--pl)}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:14px}
+.mbg.open{display:flex}
+.mbox{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.mbox h3{font-size:15px;color:var(--pl);margin-bottom:12px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 18px;font-size:13px;z-index:300;display:none;color:var(--tx);white-space:nowrap}
+.toast.show{display:block}
+.ph{margin-bottom:12px}.ph h2{font-size:17px;font-weight:bold}.ph p{font-size:12px;color:var(--mu);margin-top:2px}
+@media(max-width:600px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+  .kv{font-size:16px}
+  .pg{padding:10px}
+  .nb{font-size:11px;padding:12px 7px}
 }
 </style>
 </head>
 <body>
+<div class="toast" id="toast"></div>
 
-<!-- NAV -->
+<!-- MODAL ACTIVO -->
+<div class="mbg" id="m-activo">
+<div class="mbox">
+  <h3 id="m-activo-title">Agregar Activo</h3>
+  <input type="hidden" id="ma-idx" value="-1">
+  <div class="ig"><label class="il">Ticker (ej: NVDA, AAPL, BTC-USD)</label><input class="inp" id="ma-tk" placeholder="NVDA"></div>
+  <div class="ig"><label class="il">Nombre completo</label><input class="inp" id="ma-nm" placeholder="NVIDIA Corporation"></div>
+  <div class="ig"><label class="il">Clase de activo</label>
+    <select class="inp" id="ma-cl">
+      <option>ETF Apalancado</option><option>ETF Tecnología</option><option>ETF Global</option>
+      <option>Acción Internacional</option><option>Acción Argentina</option>
+      <option>Cripto</option><option>Commodity</option><option>Bono Soberano</option><option>Plazo Fijo / FCI</option>
+    </select></div>
+  <div class="ig"><label class="il">Moneda</label>
+    <select class="inp" id="ma-mo"><option value="USD">USD</option><option value="ARS">ARS</option></select></div>
+  <div class="ig"><label class="il">N° unidades / CEDEARs</label><input class="inp" type="number" id="ma-un" value="0"></div>
+  <div class="ig"><label class="il">Precio de costo unitario</label><input class="inp" type="number" id="ma-co" value="0" step="0.01"></div>
+  <div class="ig" id="ma-pm-wrap" style="display:none">
+    <label class="il">Precio actual manual <span class="mb">solo si no hay API</span></label>
+    <input class="inp" type="number" id="ma-pm" value="0" step="0.01">
+    <p style="font-size:10px;color:var(--mu);margin-top:3px;">Para bonos soberanos y plazo fijo. Dejá en 0 para todo lo demás.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn" style="flex:1;" onclick="saveActivo()">Guardar</button>
+    <button class="btn bred bsm" onclick="closeM('m-activo')">Cancelar</button>
+  </div>
+</div></div>
+
+<!-- MODAL META -->
+<div class="mbg" id="m-meta">
+<div class="mbox">
+  <h3 id="m-meta-title">Agregar Meta</h3>
+  <input type="hidden" id="mm-idx" value="-1">
+  <div class="ig"><label class="il">Nombre de la meta</label><input class="inp" id="mm-nm" placeholder="Ej: Viaje a Europa"></div>
+  <div class="ig"><label class="il">Monto objetivo (ARS)</label><input class="inp" type="number" id="mm-ob" value="500000"></div>
+  <div class="ig"><label class="il">Progreso actual (ARS)</label><input class="inp" type="number" id="mm-ac" value="0"></div>
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn" style="flex:1;" onclick="saveMeta()">Guardar</button>
+    <button class="btn bred bsm" onclick="closeM('m-meta')">Cancelar</button>
+  </div>
+</div></div>
+
 <nav class="nav">
-  <div class="nav-title">⚡ SFjp</div>
-  <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
-  <button class="nav-btn" onclick="showPage('activos')">Activos</button>
-  <button class="nav-btn" onclick="showPage('riesgo')">Riesgo</button>
-  <button class="nav-btn" onclick="showPage('optimizacion')">Optimización</button>
-  <button class="nav-btn" onclick="showPage('benchmark')">Benchmark</button>
-  <button class="nav-btn" onclick="showPage('finanzas')">Finanzas</button>
-  <button class="nav-btn" onclick="showPage('simuladores')">Simuladores</button>
-  <button class="nav-btn" onclick="showPage('config')">Config</button>
+  <div class="nt">⚡ SFjp</div>
+  <button class="nb active" onclick="showPg('dashboard',this)">Dashboard</button>
+  <button class="nb" onclick="showPg('activos',this)">Activos</button>
+  <button class="nb" onclick="showPg('riesgo',this)">Riesgo</button>
+  <button class="nb" onclick="showPg('opt',this)">Optimización</button>
+  <button class="nb" onclick="showPg('bench',this)">Benchmark</button>
+  <button class="nb" onclick="showPg('fin',this)">Finanzas</button>
+  <button class="nb" onclick="showPg('sims',this)">Simuladores</button>
+  <button class="nb" onclick="showPg('cfg',this)">Config</button>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: DASHBOARD
-═══════════════════════════════════════════════════════════ -->
-<div id="page-dashboard" class="page active">
-  <div class="refresh-bar">
-    <div class="refresh-dot"></div>
-    <span>Precios en tiempo real · Última actualización: <span id="last-update">cargando...</span></span>
-    <button class="btn" style="padding:4px 12px;font-size:11px;" onclick="refreshPrices()">↻ Actualizar</button>
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="pg active">
+  <div class="sb">
+    <div class="dl"></div><span>Precios en vivo</span>
+    <div class="ds"></div><span>Sync: <span id="sync-s">conectando...</span></span>
+    <span style="margin-left:auto;font-size:11px;"><span id="lu">—</span></span>
+    <button class="btn bsm" onclick="refreshAll()">↻ Actualizar</button>
   </div>
-
-  <div class="grid-4">
-    <div class="kpi">
-      <div class="kpi-label">VALOR PORTAFOLIO (ARS)</div>
-      <div class="kpi-value gold" id="d-total-ars">—</div>
-      <div class="kpi-sub">Capital inicial: $<span id="d-capital">300,000</span></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">VALOR PORTAFOLIO (USD)</div>
-      <div class="kpi-value cyan" id="d-total-usd">—</div>
-      <div class="kpi-sub">TC MEP: $<span id="d-tc">1,436</span></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">RENDIMIENTO TOTAL</div>
-      <div class="kpi-value" id="d-rend-total">—</div>
-      <div class="kpi-sub">Desde el inicio del portafolio</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">ESTADO GENERAL</div>
-      <div id="d-semaforo" style="margin-top:6px;"></div>
-      <div class="kpi-sub" id="d-dias">— días invirtiendo</div>
-    </div>
+  <div class="g4">
+    <div class="kpi"><div class="kl">PORTAFOLIO (ARS)</div><div class="kv go" id="d-ars">—</div><div class="ks">Capital: $<span id="d-cap">—</span></div></div>
+    <div class="kpi"><div class="kl">PORTAFOLIO (USD)</div><div class="kv cy" id="d-usd">—</div><div class="ks">MEP: $<span id="d-mep">—</span> <span class="ab">auto</span></div></div>
+    <div class="kpi"><div class="kl">RENDIMIENTO TOTAL</div><div class="kv" id="d-rend">—</div><div class="ks">desde el inicio</div></div>
+    <div class="kpi"><div class="kl">ESTADO</div><div id="d-sem" style="margin-top:6px;"></div><div class="ks" id="d-dias">—</div></div>
   </div>
-
-  <div class="grid-3">
-    <div class="kpi">
-      <div class="kpi-label">MEJOR ACTIVO HOY</div>
-      <div class="kpi-value up" id="d-best">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">PEOR ACTIVO HOY</div>
-      <div class="kpi-value down" id="d-worst">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">SHARPE RATIO (estimado)</div>
-      <div class="kpi-value purple" id="d-sharpe">—</div>
-      <div class="kpi-sub">> 1.0 = excelente</div>
-    </div>
+  <div class="g3">
+    <div class="kpi"><div class="kl">MEJOR ACTIVO HOY</div><div class="kv up" id="d-best">—</div></div>
+    <div class="kpi"><div class="kl">PEOR ACTIVO HOY</div><div class="kv dn" id="d-worst">—</div></div>
+    <div class="kpi"><div class="kl">SHARPE RATIO</div><div class="kv pu" id="d-sh">—</div><div class="ks">> 1.0 = excelente</div></div>
   </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Distribución del Portafolio</div>
-      <div class="chart-wrap">
-        <canvas id="chart-donut"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Evolución del Portafolio (simulada)</div>
-      <div class="chart-wrap">
-        <canvas id="chart-evolucion"></canvas>
-      </div>
-    </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Distribución del Portafolio</div><div class="cw"><canvas id="c-donut"></canvas></div></div>
+    <div class="card"><div class="ct">Evolución (simulada)</div><div class="cw"><canvas id="c-evol"></canvas></div></div>
   </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Rendimiento vs Benchmarks</div>
-      <div class="chart-wrap-sm">
-        <canvas id="chart-benchmark-dash"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Activos — Resumen Rápido</div>
-      <div id="activos-resumen-dash"></div>
-    </div>
+  <div class="g2">
+    <div class="card"><div class="ct">vs Benchmarks</div><div class="cwsm"><canvas id="c-bd"></canvas></div></div>
+    <div class="card"><div class="ct">Activos — Resumen</div><div id="a-dash"></div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: ACTIVOS
-═══════════════════════════════════════════════════════════ -->
-<div id="page-activos" class="page">
-  <div class="page-header">
-    <h2>Tabla de Activos</h2>
-    <p>Precios en tiempo real vía API · Los datos en azul son inputs manuales</p>
+<!-- ACTIVOS -->
+<div id="pg-activos" class="pg">
+  <div class="ph"><h2>Tabla de Activos</h2><p>Precios automáticos · Podés agregar, editar y eliminar activos vos mismo</p></div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+    <button class="btn bcy bsm" onclick="openAddA()">➕ Agregar activo</button>
+    <span style="font-size:11px;color:var(--mu);">Precios USD vía Yahoo Finance · YPFD vía ADR (YPF) convertido por MEP</span>
   </div>
-
-  <div class="tbl-wrap" style="margin-bottom:16px;">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Ticker</th><th>Nombre</th><th>Clase</th>
-          <th>Unidades <span class="manual-badge">manual</span></th>
-          <th>Costo Unit.</th>
-          <th>Precio Actual</th>
-          <th>Precio ARS</th>
-          <th>Costo Total ARS</th>
-          <th>Valor Mdo. ARS</th>
-          <th>G/P (ARS)</th>
-          <th>G/P (%)</th>
-          <th>% Portfolio</th>
-        </tr>
-      </thead>
-      <tbody id="activos-tbody"></tbody>
-      <tfoot id="activos-tfoot"></tfoot>
-    </table>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Distribución por Clase de Activo</div>
-      <div class="chart-wrap">
-        <canvas id="chart-clase"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Ganancia / Pérdida por Activo (ARS)</div>
-      <div class="chart-wrap">
-        <canvas id="chart-gp"></canvas>
-      </div>
-    </div>
+  <div class="tw"><table class="tbl"><thead><tr>
+    <th>Ticker</th><th>Nombre</th><th>Clase</th><th>Unidades</th>
+    <th>Costo</th><th>Precio Actual</th><th>ARS</th>
+    <th>Costo Total ARS</th><th>Valor Mdo. ARS</th>
+    <th>G/P ARS</th><th>G/P %</th><th>% Port.</th><th>Acciones</th>
+  </tr></thead>
+  <tbody id="a-tbody"></tbody>
+  <tfoot id="a-tfoot"></tfoot>
+  </table></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Distribución por Clase</div><div class="cw"><canvas id="c-clase"></canvas></div></div>
+    <div class="card"><div class="ct">Ganancia / Pérdida por Activo</div><div class="cw"><canvas id="c-gp"></canvas></div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: RIESGO
-═══════════════════════════════════════════════════════════ -->
-<div id="page-riesgo" class="page">
-  <div class="page-header">
-    <h2>Métricas de Riesgo</h2>
-    <p>Calculadas con datos históricos de los últimos 2 años</p>
+<!-- RIESGO -->
+<div id="pg-riesgo" class="pg">
+  <div class="ph"><h2>Métricas de Riesgo</h2></div>
+  <div class="g4">
+    <div class="kpi"><div class="kl">VaR 95% (diario)</div><div class="kv dn" id="r-v95">—</div><div class="ks">día normal malo</div></div>
+    <div class="kpi"><div class="kl">VaR 99% (diario)</div><div class="kv dn" id="r-v99">—</div><div class="ks">día extremo</div></div>
+    <div class="kpi"><div class="kl">MAX DRAWDOWN</div><div class="kv dn" id="r-dd">—</div><div class="ks">mayor caída histórica</div></div>
+    <div class="kpi"><div class="kl">BETA vs SPY</div><div class="kv go" id="r-beta">—</div><div class="ks">sensibilidad al mercado</div></div>
   </div>
-
-  <div class="grid-4" style="margin-bottom:16px;">
-    <div class="kpi">
-      <div class="kpi-label">VaR 95% (diario)</div>
-      <div class="kpi-value down" id="r-var95">—</div>
-      <div class="kpi-sub">Pérdida máx. en día normal</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">VaR 99% (diario)</div>
-      <div class="kpi-value down" id="r-var99">—</div>
-      <div class="kpi-sub">Pérdida máx. día extremo</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">MAX DRAWDOWN</div>
-      <div class="kpi-value down" id="r-mdd">—</div>
-      <div class="kpi-sub">Mayor caída histórica</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">BETA vs SPY</div>
-      <div class="kpi-value gold" id="r-beta">—</div>
-      <div class="kpi-sub">Sensibilidad al mercado</div>
-    </div>
+  <div class="card"><div class="ct">Estadísticas por Activo</div>
+    <div class="tw" style="margin-bottom:0;"><table class="tbl"><thead><tr><th>Activo</th><th>Rent. Anual.</th><th>Vol. Anual.</th><th>Sharpe</th><th>Sortino</th><th>Max DD</th></tr></thead>
+    <tbody id="st-tbody"></tbody></table></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Correlación — Mapa de Calor</div><div id="hm" style="overflow-x:auto;"></div></div>
+    <div class="card"><div class="ct">Diversificación por Clase</div><div id="div-c"></div><div class="cwsm" style="margin-top:8px;"><canvas id="c-div"></canvas></div></div>
   </div>
+  <div class="card"><div class="ct">Riesgo vs Retorno</div><div class="cwlg"><canvas id="c-sc"></canvas></div></div>
+</div>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Estadísticas por Activo</div>
-      <div class="tbl-wrap">
-        <table class="data-table">
-          <thead>
-            <tr><th>Activo</th><th>Rent. Anual.</th><th>Vol. Anual.</th><th>Sharpe</th><th>Sortino</th><th>Max DD</th></tr>
-          </thead>
-          <tbody id="stats-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Diversificación del Portafolio</div>
-      <div id="diversificacion-content"></div>
-      <div class="chart-wrap-sm" style="margin-top:12px;">
-        <canvas id="chart-diversificacion"></canvas>
-      </div>
-    </div>
+<!-- OPTIMIZACIÓN -->
+<div id="pg-opt" class="pg">
+  <div class="ph"><h2>Optimización de Cartera</h2><p>Comparativa de estrategias + Monte Carlo 1.000 simulaciones</p></div>
+  <div class="card"><div class="ct">Pesos por Estrategia (%)</div>
+    <div class="tw" style="margin-bottom:0;"><table class="tbl"><thead id="op-h"></thead><tbody id="op-p"></tbody></table></div></div>
+  <div class="card"><div class="ct">Métricas Comparativas</div>
+    <div class="tw" style="margin-bottom:0;"><table class="tbl"><thead id="op-mh"></thead><tbody id="op-m"></tbody></table></div></div>
+  <div class="card"><div class="ct">Monte Carlo — Riesgo vs Retorno</div><div class="cwlg"><canvas id="c-mc"></canvas></div>
+    <p style="font-size:10px;color:var(--mu);margin-top:6px;">Violeta = simuladas · Dorado = óptimas · Rombo = tu cartera</p></div>
+</div>
+
+<!-- BENCHMARK -->
+<div id="pg-bench" class="pg">
+  <div class="ph"><h2>Benchmark</h2><p>Tu portafolio vs S&P500 y MERVAL</p></div>
+  <div class="g3">
+    <div class="kpi"><div class="kl">MI PORTAFOLIO</div><div class="kv" id="b-p">—</div></div>
+    <div class="kpi"><div class="kl">SPY (estimado)</div><div class="kv cy" id="b-s">—</div></div>
+    <div class="kpi"><div class="kl">ALPHA vs SPY</div><div class="kv go" id="b-a">—</div><div class="ks">rendimiento extra</div></div>
   </div>
+  <div class="card"><div class="ct">Rendimientos por Período</div>
+    <div class="tw" style="margin-bottom:0;"><table class="tbl"><thead><tr><th>Período</th><th>Mi Portafolio</th><th>SPY</th><th>Diferencia</th></tr></thead><tbody id="b-tbody"></tbody></table></div></div>
+  <div class="card"><div class="ct">Evolución Comparativa (base 100)</div><div class="cwlg"><canvas id="c-be"></canvas></div></div>
+</div>
 
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-title">Matriz de Correlación — Mapa de Calor</div>
-    <div id="heatmap-container" style="overflow-x:auto;"></div>
+<!-- FINANZAS -->
+<div id="pg-fin" class="pg">
+  <div class="ph"><h2>Finanzas Personales</h2></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Ingresos Mensuales (ARS) <span class="mb">ingresás vos</span></div>
+      <div id="ing-in"></div><div id="ing-sum" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);"></div>
+      <div class="cwsm" style="margin-top:8px;"><canvas id="c-ing"></canvas></div></div>
+    <div class="card"><div class="ct">Gastos por Categoría (ARS) <span class="mb">ingresás vos</span></div>
+      <div id="gas-in"></div><div class="cwsm" style="margin-top:8px;"><canvas id="c-gas"></canvas></div></div>
   </div>
-
+  <div class="card"><div class="ct">Presupuesto del Mes — Regla 50/30/20</div><div class="g3" id="pres-c"></div></div>
   <div class="card">
-    <div class="card-title">Riesgo vs Retorno por Activo</div>
-    <div class="chart-wrap-lg">
-      <canvas id="chart-scatter"></canvas>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="ct" style="margin-bottom:0;">Metas de Ahorro</div>
+      <button class="btn bsm" onclick="openAddM()">➕ Nueva meta</button>
     </div>
+    <div id="metas-c"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: OPTIMIZACIÓN
-═══════════════════════════════════════════════════════════ -->
-<div id="page-optimizacion" class="page">
-  <div class="page-header">
-    <h2>Optimización de Cartera</h2>
-    <p>Comparativa de estrategias + Simulación Monte Carlo (1.000 carteras)</p>
-  </div>
-
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-title">Pesos por Estrategia (%)</div>
-    <div class="tbl-wrap">
-      <table class="data-table">
-        <thead>
-          <tr><th>Activo</th><th>Tu Cartera</th><th>Equiponderada</th><th>Max Sharpe</th><th>Min Volatilidad</th><th>Min Drawdown</th></tr>
-        </thead>
-        <tbody id="opt-pesos-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-title">Métricas Comparativas por Estrategia</div>
-    <div class="tbl-wrap">
-      <table class="data-table">
-        <thead>
-          <tr><th>Métrica</th><th>Tu Cartera</th><th>Equiponderada</th><th>Max Sharpe</th><th>Min Vol.</th><th>Min Drawdown</th></tr>
-        </thead>
-        <tbody id="opt-metrics-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Simulación Monte Carlo — 1.000 Carteras Aleatorias (Riesgo vs Retorno)</div>
-    <div class="chart-wrap-lg">
-      <canvas id="chart-montecarlo"></canvas>
-    </div>
-    <p style="font-size:10px;color:var(--text-muted);margin-top:8px;">
-      Cada punto = una cartera simulada. Los puntos dorados = carteras óptimas. Tu cartera = ⬟ violeta.
-    </p>
+<!-- SIMULADORES -->
+<div id="pg-sims" class="pg">
+  <div class="ph"><h2>Simuladores</h2></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Simulador de Mercado — ¿Qué pasa si...?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <button class="scb" onclick="setSc('d20',this)">🚀 Dólar +20%</button>
+        <button class="scb" onclick="setSc('m15',this)">📉 Mercado -15%</button>
+        <button class="scb" onclick="setSc('inf',this)">🔥 Inflación 100%</button>
+        <button class="scb" onclick="setSc('cr',this)">⚡ Crisis combinada</button>
+      </div>
+      <div class="ig"><label class="il">Variación Dólar MEP (%)</label>
+        <input type="range" min="-50" max="100" value="0" id="s-d" oninput="updSim()" style="width:100%;">
+        <span id="s-dv" style="font-size:12px;color:var(--gl);">0%</span></div>
+      <div class="ig"><label class="il">Variación S&P500 (%)</label>
+        <input type="range" min="-50" max="50" value="0" id="s-s" oninput="updSim()" style="width:100%;">
+        <span id="s-sv" style="font-size:12px;color:var(--cl);">0%</span></div>
+      <div class="ig"><label class="il">Variación MERVAL (%)</label>
+        <input type="range" min="-50" max="100" value="0" id="s-m" oninput="updSim()" style="width:100%;">
+        <span id="s-mv" style="font-size:12px;color:var(--pl);">0%</span></div>
+      <div id="sim-r" style="margin-top:8px;padding:10px;background:#111127;border-radius:8px;"></div></div>
+    <div class="card"><div class="ct">Calculadora de Metas de Ahorro</div>
+      <div style="background:#111127;border-radius:8px;padding:12px;margin-bottom:8px;">
+        <p style="font-size:11px;color:var(--cl);margin-bottom:8px;font-weight:bold;">A — Meta + Plazo → Cuota mensual</p>
+        <div class="ig"><label class="il">Meta (ARS)</label><input type="number" class="inp" id="sa-mt" value="500000" oninput="calcA()"></div>
+        <div class="ig"><label class="il">Plazo (meses)</label><input type="number" class="inp" id="sa-pl" value="24" oninput="calcA()"></div>
+        <div id="sa-ra" style="font-size:13px;color:var(--gr);margin-top:4px;"></div></div>
+      <div style="background:#111127;border-radius:8px;padding:12px;">
+        <p style="font-size:11px;color:var(--pl);margin-bottom:8px;font-weight:bold;">B — Cuota mensual → ¿Cuándo llegás?</p>
+        <div class="ig"><label class="il">Meta (ARS)</label><input type="number" class="inp" id="sb-mt" value="500000" oninput="calcB()"></div>
+        <div class="ig"><label class="il">Cuota mensual (ARS)</label><input type="number" class="inp" id="sb-cu" value="30000" oninput="calcB()"></div>
+        <div id="sb-ra" style="font-size:13px;color:var(--pl);margin-top:4px;"></div></div>
+      <div class="cwsm" style="margin-top:8px;"><canvas id="c-aho"></canvas></div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: BENCHMARK
-═══════════════════════════════════════════════════════════ -->
-<div id="page-benchmark" class="page">
-  <div class="page-header">
-    <h2>Comparación vs Benchmarks</h2>
-    <p>Tu portafolio vs S&P500 (SPY) y MERVAL</p>
-  </div>
-
-  <div class="grid-3" style="margin-bottom:16px;">
-    <div class="kpi">
-      <div class="kpi-label">MI PORTAFOLIO (desde inicio)</div>
-      <div class="kpi-value" id="b-port">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">SPY — S&P500</div>
-      <div class="kpi-value cyan" id="b-spy">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">ALPHA vs SPY</div>
-      <div class="kpi-value gold" id="b-alpha">—</div>
-      <div class="kpi-sub">Rendimiento extra vs mercado</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-title">Rendimientos Comparativos por Período</div>
-    <div class="tbl-wrap">
-      <table class="data-table">
-        <thead>
-          <tr><th>Período</th><th>Mi Portafolio</th><th>SPY</th><th>Diferencia</th></tr>
-        </thead>
-        <tbody id="bench-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Evolución Comparativa (base 100 desde inicio)</div>
-    <div class="chart-wrap-lg">
-      <canvas id="chart-bench-evol"></canvas>
-    </div>
+<!-- CONFIG -->
+<div id="pg-cfg" class="pg">
+  <div class="ph"><h2>Configuración</h2><p>Se sincroniza automáticamente en todos tus dispositivos vía Firebase</p></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Tipos de Cambio</div>
+      <div class="ig"><label class="il">Dólar MEP (ARS) <span class="ab">automático — DolarAPI</span></label>
+        <input type="number" class="inp" id="c-mep" value="1436" oninput="saveCfgD()">
+        <p style="font-size:10px;color:var(--mu);margin-top:3px;">Se actualiza solo cada 5 min. Podés sobrescribir.</p></div>
+      <div class="ig"><label class="il">Dólar Oficial (ARS)</label><input type="number" class="inp" id="c-ofi" value="1392" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">Dólar Blue (ARS)</label><input type="number" class="inp" id="c-blu" value="1405" oninput="saveCfgD()"></div></div>
+    <div class="card"><div class="ct">Datos del Portafolio</div>
+      <div class="ig"><label class="il">Nombre del inversor</label><input type="text" class="inp" id="c-nom" value="Juan Pablo Croissant" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">Fecha de inicio</label><input type="date" class="inp" id="c-fec" value="2026-04-04" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">Capital inicial (ARS)</label><input type="number" class="inp" id="c-cap" value="300000" oninput="saveCfgD()"></div></div>
+    <div class="card"><div class="ct">Parámetros Macroeconómicos <span class="mb">cada 3 meses</span></div>
+      <div class="ig"><label class="il">Inflación anual ARS (%)</label><input type="number" class="inp" id="c-inf" value="50" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">TLR ARS — Lecap (% anual)</label><input type="number" class="inp" id="c-ta" value="45" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">TLR USD — T-Bond 10Y (% anual)</label><input type="number" class="inp" id="c-tu" value="4.3" oninput="saveCfgD()"></div></div>
+    <div class="card"><div class="ct">Alertas del Semáforo</div>
+      <div class="ig"><label class="il">Rendimiento mínimo VERDE (% anual)</label><input type="number" class="inp" id="c-sg" value="8" oninput="saveCfgD()"></div>
+      <div class="ig"><label class="il">Caída para ROJO (%)</label><input type="number" class="inp" id="c-sr" value="-10" oninput="saveCfgD()"></div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: FINANZAS PERSONALES
-═══════════════════════════════════════════════════════════ -->
-<div id="page-finanzas" class="page">
-  <div class="page-header">
-    <h2>Finanzas Personales</h2>
-    <p>Ingresos · Gastos · Presupuesto · Ahorro</p>
-  </div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,setDoc,getDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  <div class="grid-2" style="margin-bottom:14px;">
-    <!-- INGRESOS -->
-    <div class="card">
-      <div class="card-title">Ingresos Mensuales (ARS) <span class="manual-badge">ingresá vos</span></div>
-      <div id="ingresos-inputs"></div>
-      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;" id="ingresos-summary"></div>
-      <div class="chart-wrap-sm" style="margin-top:12px;">
-        <canvas id="chart-ingresos"></canvas>
-      </div>
-    </div>
-    <!-- GASTOS -->
-    <div class="card">
-      <div class="card-title">Gastos por Categoría (ARS) <span class="manual-badge">ingresá vos</span></div>
-      <div id="gastos-inputs"></div>
-      <div class="chart-wrap-sm" style="margin-top:12px;">
-        <canvas id="chart-gastos"></canvas>
-      </div>
-    </div>
-  </div>
+const FB={apiKey:"AIzaSyBmXjoSfAL67DOFXSoQaovJccLDt3K2HcM",authDomain:"sistema-financiero-jp.firebaseapp.com",projectId:"sistema-financiero-jp",storageBucket:"sistema-financiero-jp.firebasestorage.app",messagingSenderId:"912022659886",appId:"1:912022659886:web:0a782a6f6407285c9bd0bf"};
+const app=initializeApp(FB);
+const db=getFirestore(app);
+const ref=doc(db,"portfolios","jp_main");
 
-  <!-- PRESUPUESTO -->
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-title">Presupuesto del Mes — Regla 50/30/20</div>
-    <div class="grid-3" id="presupuesto-content"></div>
-  </div>
-
-  <!-- AHORRO -->
-  <div class="card">
-    <div class="card-title">Metas de Ahorro</div>
-    <div id="ahorro-metas"></div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: SIMULADORES
-═══════════════════════════════════════════════════════════ -->
-<div id="page-simuladores" class="page">
-  <div class="page-header">
-    <h2>Simuladores</h2>
-    <p>What-If de mercado + Calculadora de metas de ahorro</p>
-  </div>
-
-  <div class="grid-2" style="margin-bottom:14px;">
-    <!-- SIMULADOR MERCADO -->
-    <div class="card">
-      <div class="card-title">Simulador de Mercado — ¿Qué pasa si...?</div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-        <button class="scenario-btn" onclick="setScenario('dolar20')">🚀 Dólar +20%</button>
-        <button class="scenario-btn" onclick="setScenario('caida15')">📉 Mercado -15%</button>
-        <button class="scenario-btn" onclick="setScenario('inflacion')">🔥 Inflación 100%</button>
-        <button class="scenario-btn" onclick="setScenario('crisis')">⚡ Crisis combinada</button>
-      </div>
-
-      <div class="input-group">
-        <label class="input-label">Variación Dólar MEP (%)</label>
-        <input type="range" min="-50" max="100" value="0" id="sim-dolar" class="inp" style="padding:0;" oninput="updateSim()">
-        <span id="sim-dolar-val" style="font-size:12px;color:var(--gold-light);">0%</span>
-      </div>
-      <div class="input-group">
-        <label class="input-label">Variación S&P500 (%)</label>
-        <input type="range" min="-50" max="50" value="0" id="sim-spy" class="inp" style="padding:0;" oninput="updateSim()">
-        <span id="sim-spy-val" style="font-size:12px;color:var(--cyan-light);">0%</span>
-      </div>
-      <div class="input-group">
-        <label class="input-label">Variación MERVAL (%)</label>
-        <input type="range" min="-50" max="100" value="0" id="sim-merv" class="inp" style="padding:0;" oninput="updateSim()">
-        <span id="sim-merv-val" style="font-size:12px;color:var(--purple-light);">0%</span>
-      </div>
-
-      <div id="sim-resultado" style="margin-top:12px;padding:12px;background:#111127;border-radius:8px;"></div>
-    </div>
-
-    <!-- SIMULADOR AHORRO -->
-    <div class="card">
-      <div class="card-title">Simulador de Ahorro — Calculadora de Metas</div>
-
-      <div style="background:#111127;border-radius:8px;padding:12px;margin-bottom:12px;">
-        <p style="font-size:11px;color:var(--cyan-light);margin-bottom:8px;font-weight:bold;">A — Tengo una META → ¿Cuánto ahorro por mes?</p>
-        <div class="input-group">
-          <label class="input-label">Meta de ahorro (ARS)</label>
-          <input type="number" class="inp" id="meta-monto" value="500000" oninput="calcAhorro()">
-        </div>
-        <div class="input-group">
-          <label class="input-label">Plazo (meses)</label>
-          <input type="number" class="inp" id="meta-plazo" value="24" oninput="calcAhorro()">
-        </div>
-        <div id="meta-resultado-a" style="font-size:13px;color:var(--green);margin-top:6px;"></div>
-      </div>
-
-      <div style="background:#111127;border-radius:8px;padding:12px;margin-bottom:12px;">
-        <p style="font-size:11px;color:var(--purple-light);margin-bottom:8px;font-weight:bold;">B — Puedo ahorrar X por mes → ¿Cuándo llego?</p>
-        <div class="input-group">
-          <label class="input-label">Meta total (ARS)</label>
-          <input type="number" class="inp" id="meta-b-monto" value="500000" oninput="calcAhorroB()">
-        </div>
-        <div class="input-group">
-          <label class="input-label">Cuota mensual disponible (ARS)</label>
-          <input type="number" class="inp" id="meta-b-cuota" value="30000" oninput="calcAhorroB()">
-        </div>
-        <div id="meta-resultado-b" style="font-size:13px;color:var(--purple-light);margin-top:6px;"></div>
-      </div>
-
-      <div class="chart-wrap-sm">
-        <canvas id="chart-ahorro-proyeccion"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE: CONFIG
-═══════════════════════════════════════════════════════════ -->
-<div id="page-config" class="page">
-  <div class="page-header">
-    <h2>Configuración</h2>
-    <p>Actualizá tus posiciones, tipos de cambio y parámetros</p>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Tipos de Cambio ARS/USD <span class="manual-badge">actualizar diariamente</span></div>
-      <div class="input-group">
-        <label class="input-label">Dólar MEP (ARS por 1 USD)</label>
-        <input type="number" class="inp" id="cfg-mep" value="1436" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Dólar Oficial (ARS por 1 USD)</label>
-        <input type="number" class="inp" id="cfg-oficial" value="1392" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Dólar Blue (ARS por 1 USD)</label>
-        <input type="number" class="inp" id="cfg-blue" value="1405" oninput="saveConfig()">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Parámetros Macroeconómicos <span class="manual-badge">cada 3 meses</span></div>
-      <div class="input-group">
-        <label class="input-label">Inflación anual estimada ARS (%)</label>
-        <input type="number" class="inp" id="cfg-inflacion" value="50" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Tasa libre de riesgo ARS — Lecap (% anual)</label>
-        <input type="number" class="inp" id="cfg-tlr-ars" value="45" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Tasa libre de riesgo USD — T-Bond 10Y (% anual)</label>
-        <input type="number" class="inp" id="cfg-tlr-usd" value="4.3" oninput="saveConfig()">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Mis Posiciones <span class="manual-badge">actualizar al operar</span></div>
-      <div id="posiciones-config"></div>
-      <button class="btn" style="margin-top:12px;width:100%;" onclick="savePositions()">Guardar Posiciones</button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Datos del Portafolio</div>
-      <div class="input-group">
-        <label class="input-label">Nombre del inversor</label>
-        <input type="text" class="inp" id="cfg-nombre" value="Juan Pablo Croissant" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Fecha de inicio del portafolio</label>
-        <input type="date" class="inp" id="cfg-fecha" value="2026-04-04" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Capital inicial (ARS)</label>
-        <input type="number" class="inp" id="cfg-capital" value="300000" oninput="saveConfig()">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Precio YPFD (ARS) <span class="manual-badge">actualizar manualmente</span></label>
-        <input type="number" class="inp" id="cfg-ypfd" value="57000" oninput="saveConfig()">
-        <p style="font-size:10px;color:var(--text-muted);margin-top:4px;">Fuente: Rava Bursátil o Bolsar</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════════════════════ -->
-<script>
-// ── STATE ──────────────────────────────────────────────────────────────────
-const STATE = {
-  config: {
-    mep: 1436, oficial: 1392, blue: 1405,
-    inflacion: 50, tlr_ars: 45, tlr_usd: 4.3,
-    nombre: 'Juan Pablo Croissant',
-    fecha_inicio: '2026-04-04',
-    capital_inicial: 300000,
-    ypfd_precio: 57000
-  },
-  positions: [
-    { ticker:'SSO', nombre:'ProShares Ultra S&P500', clase:'ETF Apalancado', moneda:'USD', units:8, cost:14, price:0, change:0 },
-    { ticker:'XLK', nombre:'Technology Select SPDR', clase:'ETF Tecnología',  moneda:'USD', units:24, cost:4500/1436, price:0, change:0 },
-    { ticker:'YPFD', nombre:'YPF S.A.',              clase:'Acción Argentina', moneda:'ARS', units:0, cost:5000, price:57000, change:0 },
-    { ticker:'KO',  nombre:'Coca-Cola Co.',          clase:'Acción Intl.',    moneda:'USD', units:3, cost:76, price:0, change:0 },
+window.S={
+  cfg:{mep:1436,oficial:1392,blue:1405,inflacion:50,tlr_ars:45,tlr_usd:4.3,nombre:"Juan Pablo Croissant",fecha_inicio:"2026-04-04",capital_inicial:300000,sem_verde:8,sem_rojo:-10},
+  pos:[
+    {tk:"SSO",nm:"ProShares Ultra S&P500",cl:"ETF Apalancado",mo:"USD",un:8,co:14,pr:0,ch:0,pm:0},
+    {tk:"XLK",nm:"Technology Select SPDR",cl:"ETF Tecnología",mo:"USD",un:24,co:3.13,pr:0,ch:0,pm:0},
+    {tk:"YPFD",nm:"YPF S.A.",cl:"Acción Argentina",mo:"ARS",un:0,co:5000,pr:57000,ch:0,pm:57000},
+    {tk:"KO",nm:"Coca-Cola Co.",cl:"Acción Intl.",mo:"USD",un:3,co:76,pr:0,ch:0,pm:0},
   ],
-  ingresos: { Ene:0,Feb:0,Mar:0,Abr:120000,May:0,Jun:0,Jul:0,Ago:0,Sep:0,Oct:0,Nov:0,Dic:0 },
-  gastos: { Alimentación:15000, Transporte:5000, Entretenimiento:8000, Educación:3000, Inversiones:30000, Otros:5000 },
-  metas: [
-    { nombre:'Fondo de emergencia', objetivo:500000, actual:120000 },
-    { nombre:'Capital USD 1.000', objetivo:1436000, actual:359000 },
-    { nombre:'Working Holiday Australia', objetivo:2000000, actual:50000 },
-    { nombre:'Primer negocio', objetivo:5000000, actual:0 },
+  ing:{Ene:0,Feb:0,Mar:0,Abr:120000,May:0,Jun:0,Jul:0,Ago:0,Sep:0,Oct:0,Nov:0,Dic:0},
+  gas:{Alimentación:15000,Transporte:5000,Entretenimiento:8000,Educación:3000,Inversiones:30000,Otros:5000},
+  metas:[
+    {nm:"Fondo de emergencia",ob:500000,ac:120000},
+    {nm:"Capital USD 1.000",ob:1436000,ac:359000},
+    {nm:"Working Holiday Australia",ob:2000000,ac:50000},
   ],
-  charts: {},
-  prices_loaded: false
+  ch:{},fbOk:false
 };
 
-// ── LOAD / SAVE ─────────────────────────────────────────────────────────────
-function loadStorage() {
-  try {
-    const s = localStorage.getItem('sfjp_v2');
-    if (s) {
-      const d = JSON.parse(s);
-      if (d.config) Object.assign(STATE.config, d.config);
-      if (d.positions) STATE.positions = d.positions;
-      if (d.ingresos) STATE.ingresos = d.ingresos;
-      if (d.gastos) STATE.gastos = d.gastos;
-      if (d.metas) STATE.metas = d.metas;
+// Firebase load
+async function fbLoad(){
+  try{
+    const sn=await getDoc(ref);
+    if(sn.exists()){
+      const d=sn.data();
+      if(d.cfg)Object.assign(S.cfg,d.cfg);
+      if(d.pos)S.pos=d.pos;
+      if(d.ing)S.ing=d.ing;
+      if(d.gas)S.gas=d.gas;
+      if(d.metas)S.metas=d.metas;
     }
-  } catch(e) {}
+    S.fbOk=true;
+    setSync("✓ sincronizado");
+    refreshAll();
+  }catch(e){setSync("sin internet — local");loadLocal();}
 }
 
-function saveAll() {
-  try { localStorage.setItem('sfjp_v2', JSON.stringify({ config:STATE.config, positions:STATE.positions, ingresos:STATE.ingresos, gastos:STATE.gastos, metas:STATE.metas })); } catch(e) {}
+onSnapshot(ref,sn=>{
+  if(!sn.exists()||!S.fbOk)return;
+  const d=sn.data();
+  if(d.cfg)Object.assign(S.cfg,d.cfg);
+  if(d.pos)S.pos=d.pos;
+  if(d.ing)S.ing=d.ing;
+  if(d.gas)S.gas=d.gas;
+  if(d.metas)S.metas=d.metas;
+  calc();rAct();syncCfg();setSync("✓ sincronizado");
+});
+
+window.fbSave=async()=>{
+  try{
+    await setDoc(ref,{cfg:S.cfg,pos:S.pos.map(p=>({...p,pr:0,ch:0})),ing:S.ing,gas:S.gas,metas:S.metas,ts:new Date().toISOString()});
+    setSync("✓ guardado");toast("✓ Guardado en la nube");
+  }catch(e){toast("⚠ Error al guardar");}
+};
+
+function loadLocal(){
+  try{const s=localStorage.getItem("sfjp4");if(s){const d=JSON.parse(s);if(d.cfg)Object.assign(S.cfg,d.cfg);if(d.pos)S.pos=d.pos;if(d.ing)S.ing=d.ing;if(d.gas)S.gas=d.gas;if(d.metas)S.metas=d.metas;}}catch(e){}
+  refreshAll();
+}
+function saveLocal(){
+  try{localStorage.setItem("sfjp4",JSON.stringify({cfg:S.cfg,pos:S.pos.map(p=>({...p,pr:0,ch:0})),ing:S.ing,gas:S.gas,metas:S.metas}));}catch(e){}
+}
+window.saveAll=()=>{saveLocal();fbSave();};
+
+fbLoad();
+
+// ── DOLAR AUTO ────────────────────────────────────────────────────────────────
+async function fetchMEP(){
+  try{const r=await fetch("https://api.dolarapi.com/v1/dolares/bolsa");const d=await r.json();if(d&&d.venta){S.cfg.mep=Math.round(d.venta*100)/100;const el=document.getElementById("c-mep");if(el)el.value=S.cfg.mep;document.getElementById("d-mep").textContent=fmt(S.cfg.mep,0);}}catch(e){}
 }
 
-function saveConfig() {
-  STATE.config.mep = +document.getElementById('cfg-mep').value || 1436;
-  STATE.config.oficial = +document.getElementById('cfg-oficial').value || 1392;
-  STATE.config.blue = +document.getElementById('cfg-blue').value || 1405;
-  STATE.config.inflacion = +document.getElementById('cfg-inflacion').value || 50;
-  STATE.config.tlr_ars = +document.getElementById('cfg-tlr-ars').value || 45;
-  STATE.config.tlr_usd = +document.getElementById('cfg-tlr-usd').value || 4.3;
-  STATE.config.nombre = document.getElementById('cfg-nombre').value;
-  STATE.config.fecha_inicio = document.getElementById('cfg-fecha').value;
-  STATE.config.capital_inicial = +document.getElementById('cfg-capital').value || 300000;
-  STATE.config.ypfd_precio = +document.getElementById('cfg-ypfd').value || 57000;
-  // update YPFD price
-  const yp = STATE.positions.find(p=>p.ticker==='YPFD');
-  if(yp) yp.price = STATE.config.ypfd_precio;
-  saveAll();
-  renderAll();
+// ── YAHOO PRICE ───────────────────────────────────────────────────────────────
+async function fetchY(tk){
+  try{
+    const u=`https://query1.finance.yahoo.com/v8/finance/chart/${tk}?interval=1d&range=2d`;
+    const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`);
+    const j=await r.json();const d=JSON.parse(j.contents);
+    const res=d.chart.result[0];const cl=res.indicators.quote[0].close.filter(v=>v!=null);
+    const pr=Math.round(cl[cl.length-1]*100)/100;
+    const pv=cl.length>1?cl[cl.length-2]:pr;
+    return{pr,ch:Math.round((pr-pv)/pv*10000)/100};
+  }catch(e){return null;}
 }
 
-// ── PAGES ───────────────────────────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  event.target.classList.add('active');
-  renderPage(id);
-}
-
-function renderPage(id) {
-  const renders = {
-    dashboard: renderDashboard,
-    activos: renderActivos,
-    riesgo: renderRiesgo,
-    optimizacion: renderOptimizacion,
-    benchmark: renderBenchmark,
-    finanzas: renderFinanzas,
-    simuladores: renderSimuladores,
-    config: renderConfig,
-  };
-  if (renders[id]) renders[id]();
-}
-
-// ── PRICE FETCHING ──────────────────────────────────────────────────────────
-async function fetchPrice(ticker) {
-  // Use Yahoo Finance via allorigins proxy
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxy);
-    const json = await res.json();
-    const data = JSON.parse(json.contents);
-    const result = data.chart.result[0];
-    const quotes = result.indicators.quote[0];
-    const closes = quotes.close.filter(v=>v!=null);
-    const price = closes[closes.length-1];
-    const prevPrice = closes.length > 1 ? closes[closes.length-2] : price;
-    const change = prevPrice ? ((price-prevPrice)/prevPrice*100) : 0;
-    return { price: Math.round(price*100)/100, change: Math.round(change*100)/100 };
-  } catch(e) {
-    return null;
-  }
-}
-
-async function refreshPrices() {
-  document.getElementById('last-update').textContent = 'actualizando...';
-  const tickers = STATE.positions.filter(p=>p.moneda==='USD').map(p=>p.ticker);
-  for (const pos of STATE.positions) {
-    if (pos.moneda === 'USD') {
-      const data = await fetchPrice(pos.ticker);
-      if (data) { pos.price = data.price; pos.change = data.change; }
-    } else {
-      pos.price = STATE.config.ypfd_precio;
+window.refreshAll=async()=>{
+  document.getElementById("lu").textContent="actualizando...";
+  await fetchMEP();
+  for(const p of S.pos){
+    if(p.pm>0){p.pr=p.pm;p.ch=0;}
+    else if(p.mo==="USD"){
+      const t=p.tk==="YPFD"?"YPF":p.tk;
+      const d=await fetchY(t);
+      if(d){
+        if(p.tk==="YPFD"){p.pr=Math.round(d.pr*S.cfg.mep);p.ch=d.ch;}
+        else{p.pr=d.pr;p.ch=d.ch;}
+      }
     }
   }
-  STATE.prices_loaded = true;
-  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-AR');
-  renderAll();
-}
+  calc();rAct();
+  document.getElementById("lu").textContent=new Date().toLocaleTimeString("es-AR");
+  saveLocal();
+};
 
-// ── CALCULATIONS ─────────────────────────────────────────────────────────────
-function calcPortfolio() {
-  const tc = STATE.config.mep;
-  let totalARS = 0, totalCosto = 0;
-  STATE.positions.forEach(p => {
-    const priceARS = p.moneda === 'USD' ? p.price * tc : p.price;
-    const costoARS = p.moneda === 'USD' ? p.cost * tc * p.units : p.cost * p.units;
-    const mktARS = priceARS * p.units;
-    p.priceARS = priceARS;
-    p.costoTotalARS = costoARS;
-    p.mktARS = mktARS;
-    p.gpARS = mktARS - costoARS;
-    p.gpPct = costoARS > 0 ? (mktARS - costoARS) / costoARS * 100 : 0;
-    totalARS += mktARS;
-    totalCosto += costoARS;
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+window.fmt=(n,dec=0)=>n==null||isNaN(n)?"—":n.toLocaleString("es-AR",{minimumFractionDigits:dec,maximumFractionDigits:dec});
+window.fp=(n,dec=1)=>{const v=Math.round(n*Math.pow(10,dec+2))/Math.pow(10,dec);return(v>0?"+":"")+v.toFixed(dec)+"%";};
+window.cc=n=>n>=0?"up":"dn";
+const CL=["#7c3aed","#06b6d4","#f59e0b","#10b981","#ec4899","#f97316","#8b5cf6","#14b8a6","#f59e0b","#84cc16"];
+window.toast=(msg,ms=2500)=>{const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),ms);};
+const setSync=s=>document.getElementById("sync-s").textContent=s;
+window.dC=id=>{if(S.ch[id]){S.ch[id].destroy();delete S.ch[id];}};
+window.mC=(id,cfg)=>{dC(id);const c=document.getElementById(id);if(c)S.ch[id]=new Chart(c,cfg);};
+const STATS={
+  "ETF Apalancado":{ra:.24,va:.45,sh:.49,so:.72,dd:-.48},
+  "ETF Tecnología":{ra:.18,va:.22,sh:.61,so:.89,dd:-.33},
+  "ETF Global":{ra:.12,va:.18,sh:.50,so:.70,dd:-.25},
+  "Acción Internacional":{ra:.10,va:.20,sh:.35,so:.55,dd:-.28},
+  "Acción Argentina":{ra:.15,va:.35,sh:.31,so:.45,dd:-.55},
+  "Cripto":{ra:.45,va:.80,sh:.52,so:.65,dd:-.75},
+  "Commodity":{ra:.08,va:.15,sh:.25,so:.38,dd:-.20},
+  "Bono Soberano":{ra:.06,va:.12,sh:.15,so:.22,dd:-.18},
+  "Plazo Fijo / FCI":{ra:.04,va:.01,sh:.80,so:1.20,dd:-.01},
+};
+window.gSt=p=>STATS[p.cl]||{ra:.10,va:.20,sh:.30,so:.45,dd:-.25};
+
+// ── CALC ──────────────────────────────────────────────────────────────────────
+window.calc=()=>{
+  const tc=S.cfg.mep;let ta=0,tc2=0;
+  S.pos.forEach(p=>{
+    const pa=p.mo==="USD"?p.pr*tc:p.pr;
+    const ca=p.mo==="USD"?p.co*tc*p.un:p.co*p.un;
+    const ma=pa*p.un;
+    p.pa=pa;p.ca=ca;p.ma=ma;p.ga=ma-ca;p.gp=ca>0?(ma-ca)/ca*100:0;
+    ta+=ma;tc2+=ca;
   });
-  STATE.positions.forEach(p => { p.pctPortfolio = totalARS > 0 ? p.mktARS / totalARS * 100 : 0; });
-  return { totalARS, totalUSD: totalARS / tc, totalCosto, gpARS: totalARS - totalCosto, gpPct: totalCosto > 0 ? (totalARS-totalCosto)/totalCosto*100 : 0 };
+  S.pos.forEach(p=>p.pct=ta>0?p.ma/ta*100:0);
+  return{ta,tu:ta/tc,tc:tc2,ga:ta-tc2,gp:tc2>0?(ta-tc2)/tc2*100:0};
+};
+
+// ── PAGES ─────────────────────────────────────────────────────────────────────
+window.showPg=(id,btn)=>{
+  document.querySelectorAll(".pg").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
+  document.getElementById("pg-"+id).classList.add("active");
+  if(btn)btn.classList.add("active");
+  rPage(id);
+};
+window.rAct=()=>{const a=document.querySelector(".pg.active");if(a)rPage(a.id.replace("pg-",""));};
+window.rPage=id=>{const m={dashboard:rDash,activos:rActivos,riesgo:rRiesgo,opt:rOpt,bench:rBench,fin:rFin,sims:rSims,cfg:syncCfg};if(m[id])m[id]();};
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function rDash(){
+  const p=calc();const tc=S.cfg.mep;const cap=S.cfg.capital_inicial;
+  document.getElementById("d-ars").textContent="$"+fmt(p.ta);
+  document.getElementById("d-usd").textContent="USD "+fmt(p.tu,2);
+  document.getElementById("d-cap").textContent=fmt(cap);
+  document.getElementById("d-mep").textContent=fmt(tc,0);
+  const re=document.getElementById("d-rend");re.textContent=fp(p.gp);re.className="kv "+cc(p.gp);
+  const dias=Math.max(0,Math.floor((new Date()-new Date(S.cfg.fecha_inicio))/86400000));
+  document.getElementById("d-dias").textContent=dias+" días invirtiendo";
+  const sv=S.cfg.sem_verde||8;const sr=S.cfg.sem_rojo||-10;
+  const sem=document.getElementById("d-sem");
+  sem.innerHTML=p.gp>=sv?'<span class="sem sg">🟢 VERDE</span>':p.gp>=sr?'<span class="sem sy">🟡 AMARILLO</span>':'<span class="sem sr">🔴 ROJO</span>';
+  const sorted=[...S.pos].filter(x=>x.pr>0).sort((a,b)=>b.ch-a.ch);
+  if(sorted.length){document.getElementById("d-best").textContent=sorted[0].tk+" "+fp(sorted[0].ch);document.getElementById("d-worst").textContent=sorted[sorted.length-1].tk+" "+fp(sorted[sorted.length-1].ch);}
+  const ws=S.pos.map(x=>x.pct/100);const st=S.pos.map(gSt);
+  const pr=ws.reduce((s,w,i)=>s+w*st[i].ra,0);
+  const pv=Math.sqrt(ws.reduce((s,w,i)=>s+Math.pow(w*st[i].va,2),0));
+  document.getElementById("d-sh").textContent=pv>0?((pr-S.cfg.tlr_usd/100)/pv).toFixed(2):"—";
+
+  mC("c-donut",{type:"doughnut",data:{labels:S.pos.map(x=>x.tk),datasets:[{data:S.pos.map(x=>Math.max(0,x.pct)),backgroundColor:CL,borderColor:"#0f0f1a",borderWidth:3}]},options:{plugins:{legend:{position:"right",labels:{color:"#94a3b8",font:{size:11},boxWidth:10}}},maintainAspectRatio:false}});
+  const mnths=["Oct","Nov","Dic","Ene","Feb","Mar","Abr"];
+  const ev=mnths.map((_,i)=>Math.round(cap*(1+i*.035)));ev[ev.length-1]=Math.round(p.ta);
+  mC("c-evol",{type:"line",data:{labels:mnths,datasets:[{data:ev,borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,0.15)",fill:true,tension:.4,pointRadius:3}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#64748b",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#64748b",font:{size:9},callback:v=>"$"+fmt(v)},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
+  mC("c-bd",{type:"bar",data:{labels:["Mi Portafolio","SPY (est.)","MERVAL (est.)"],datasets:[{data:[p.gp,22,45],backgroundColor:["#7c3aed","#06b6d4","#f59e0b"],borderRadius:5}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#64748b",font:{size:10}},grid:{display:false}},y:{ticks:{color:"#64748b",font:{size:9},callback:v=>v+"%"},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
+  document.getElementById("a-dash").innerHTML=S.pos.map((x,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="width:7px;height:7px;border-radius:50%;background:${CL[i]};flex-shrink:0;"></div><span style="flex:1;font-size:12px;font-weight:bold;color:${CL[i]};">${x.tk}</span><span style="font-size:12px;">${x.pr>0?(x.mo==="USD"?"USD "+fmt(x.pr,2):"$"+fmt(x.pr,0)):"⟳"}</span><span style="font-size:12px;" class="${cc(x.ch)}">${x.pr>0?fp(x.ch):"—"}</span></div>`).join("");
 }
 
-function calcStats(pos) {
-  // Estimated stats based on known historical data for these tickers
-  const known = {
-    SSO:  { rentAnual:0.24, volAnual:0.45, sharpe:0.49, sortino:0.72, maxDD:-0.48 },
-    XLK:  { rentAnual:0.18, volAnual:0.22, sharpe:0.61, sortino:0.89, maxDD:-0.33 },
-    YPFD: { rentAnual:0.15, volAnual:0.35, sharpe:0.31, sortino:0.45, maxDD:-0.55 },
-    KO:   { rentAnual:0.06, volAnual:0.14, sharpe:0.14, sortino:0.22, maxDD:-0.18 },
-  };
-  return known[pos.ticker] || { rentAnual:0.10, volAnual:0.20, sharpe:0.30, sortino:0.45, maxDD:-0.25 };
-}
-
-function calcCorrelation() {
-  return {
-    SSO:  { SSO:1.00, XLK:0.88, YPFD:0.32, KO:0.41 },
-    XLK:  { SSO:0.88, XLK:1.00, YPFD:0.28, KO:0.38 },
-    YPFD: { SSO:0.32, XLK:0.28, YPFD:1.00, KO:0.15 },
-    KO:   { SSO:0.41, XLK:0.38, YPFD:0.15, KO:1.00 },
-  };
-}
-
-// ── RENDER HELPERS ───────────────────────────────────────────────────────────
-function fmt(n, dec=0) { return n==null||isNaN(n)?'—':n.toLocaleString('es-AR',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
-function fmtPct(n,dec=1) { const v=Math.round(n*Math.pow(10,dec+2))/Math.pow(10,dec); return (v>0?'+':'')+v.toFixed(dec)+'%'; }
-function colorClass(n) { return n>=0?'up':'down'; }
-function destroyChart(id) { if(STATE.charts[id]) { STATE.charts[id].destroy(); delete STATE.charts[id]; } }
-function mkChart(id, config) { destroyChart(id); const c=document.getElementById(id); if(c){ STATE.charts[id]=new Chart(c,config); } }
-
-const COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ec4899','#f97316'];
-const COLORS_ALPHA = (i,a=0.3) => COLORS[i%COLORS.length]+(Math.round(a*255).toString(16).padStart(2,'0'));
-
-// ── DASHBOARD ────────────────────────────────────────────────────────────────
-function renderDashboard() {
-  const port = calcPortfolio();
-  const tc = STATE.config.mep;
-  const cap = STATE.config.capital_inicial;
-
-  document.getElementById('d-total-ars').textContent = '$'+fmt(port.totalARS);
-  document.getElementById('d-total-usd').textContent = 'USD '+fmt(port.totalUSD,2);
-  document.getElementById('d-capital').textContent = fmt(cap);
-  document.getElementById('d-tc').textContent = fmt(tc);
-
-  const rendEl = document.getElementById('d-rend-total');
-  rendEl.textContent = fmtPct(port.gpPct);
-  rendEl.className = 'kpi-value ' + colorClass(port.gpPct);
-
-  // Días
-  const dias = Math.floor((new Date()-new Date(STATE.config.fecha_inicio))/86400000);
-  document.getElementById('d-dias').textContent = dias+' días invirtiendo';
-
-  // Semáforo
-  const sem = document.getElementById('d-semaforo');
-  if(port.gpPct >= 8) sem.innerHTML='<span class="semaforo sem-green">🟢 VERDE — Bien</span>';
-  else if(port.gpPct >= -5) sem.innerHTML='<span class="semaforo sem-yellow">🟡 AMARILLO — Atención</span>';
-  else sem.innerHTML='<span class="semaforo sem-red">🔴 ROJO — Revisar</span>';
-
-  // Mejor/peor
-  const sorted = [...STATE.positions].filter(p=>p.price>0).sort((a,b)=>b.change-a.change);
-  if(sorted.length) {
-    document.getElementById('d-best').textContent = sorted[0].ticker+' '+fmtPct(sorted[0].change);
-    document.getElementById('d-worst').textContent = sorted[sorted.length-1].ticker+' '+fmtPct(sorted[sorted.length-1].change);
-  }
-
-  // Sharpe estimado del portafolio
-  const weights = STATE.positions.map(p=>p.pctPortfolio/100);
-  const stats = STATE.positions.map(calcStats);
-  const portReturn = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
-  const portVol = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
-  const sharpe = portVol>0?(portReturn-STATE.config.tlr_usd/100)/portVol:0;
-  document.getElementById('d-sharpe').textContent = sharpe.toFixed(2);
-
-  document.getElementById('d-tc').textContent = fmt(tc);
-
-  // Charts
-  mkChart('chart-donut',{
-    type:'doughnut',
-    data:{
-      labels: STATE.positions.map(p=>p.ticker),
-      datasets:[{ data: STATE.positions.map(p=>Math.max(0,p.pctPortfolio)), backgroundColor:COLORS, borderColor:'#0f0f1a', borderWidth:3 }]
-    },
-    options:{ plugins:{ legend:{ position:'right', labels:{ color:'#94a3b8', font:{size:11}, boxWidth:12 } } }, maintainAspectRatio:false }
-  });
-
-  // Evolución simulada
-  const months = ['Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
-  const base = cap;
-  const evol = months.map((_,i)=>Math.round(base*(1+i*0.035+Math.random()*0.01)));
-  evol[evol.length-1] = Math.round(port.totalARS);
-  mkChart('chart-evolucion',{
-    type:'line',
-    data:{
-      labels:months,
-      datasets:[{ label:'Portafolio ARS', data:evol, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.15)', fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#7c3aed' }]
-    },
-    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}}, scales:{ x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
-  });
-
-  // Benchmark bar
-  mkChart('chart-benchmark-dash',{
-    type:'bar',
-    data:{
-      labels:['Mi Portafolio','SPY (estimado)','MERVAL (estimado)'],
-      datasets:[{ data:[port.gpPct,22,45], backgroundColor:['#7c3aed','#06b6d4','#f59e0b'], borderRadius:5 }]
-    },
-    options:{ plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#64748b',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
-  });
-
-  // Activos resumen
-  const cont = document.getElementById('activos-resumen-dash');
-  cont.innerHTML = STATE.positions.map((p,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-      <div style="width:8px;height:8px;border-radius:50%;background:${COLORS[i]};flex-shrink:0;"></div>
-      <span style="flex:1;font-size:12px;font-weight:bold;color:${COLORS[i]};">${p.ticker}</span>
-      <span style="font-size:12px;">${p.price>0?'USD '+fmt(p.price,2):'—'}</span>
-      <span style="font-size:12px;" class="${colorClass(p.change)}">${p.price>0?fmtPct(p.change):'—'}</span>
-    </div>
-  `).join('');
-}
-
-// ── ACTIVOS ──────────────────────────────────────────────────────────────────
-function renderActivos() {
-  const port = calcPortfolio();
-  const tbody = document.getElementById('activos-tbody');
-  const tfoot = document.getElementById('activos-tfoot');
-
-  tbody.innerHTML = STATE.positions.map((p,i)=>`
-    <tr>
-      <td><span class="ticker">${p.ticker}</span></td>
-      <td style="color:var(--text-muted);font-size:11px;">${p.nombre}</td>
-      <td style="font-size:11px;">${p.clase}</td>
-      <td style="color:var(--cyan-light);">${fmt(p.units)}</td>
-      <td style="color:var(--cyan-light);">${p.moneda==='USD'?'USD '+fmt(p.cost,2):'$'+fmt(p.cost)}</td>
-      <td style="font-weight:bold;">${p.price>0?(p.moneda==='USD'?'USD '+fmt(p.price,2):'$'+fmt(p.price)):'cargando...'}</td>
-      <td>$${fmt(p.priceARS,0)}</td>
-      <td>$${fmt(p.costoTotalARS,0)}</td>
-      <td style="font-weight:bold;">$${fmt(p.mktARS,0)}</td>
-      <td class="${colorClass(p.gpARS)}" style="font-weight:bold;">$${fmt(Math.abs(p.gpARS),0)}</td>
-      <td class="${colorClass(p.gpPct)}" style="font-weight:bold;">${fmtPct(p.gpPct)}</td>
-      <td>${fmt(p.pctPortfolio,1)}%</td>
-    </tr>
-  `).join('');
-
-  tfoot.innerHTML = `<tr style="background:#111127;">
-    <td colspan="8" style="font-weight:bold;color:var(--gold-light);padding:10px;">TOTAL</td>
-    <td style="font-weight:bold;color:var(--gold-light);">$${fmt(port.totalARS,0)}</td>
-    <td class="${colorClass(port.gpARS)}" style="font-weight:bold;">$${fmt(Math.abs(port.gpARS),0)}</td>
-    <td class="${colorClass(port.gpPct)}" style="font-weight:bold;">${fmtPct(port.gpPct)}</td>
-    <td style="color:var(--gold-light);">100.0%</td>
-  </tr>`;
-
-  mkChart('chart-clase',{type:'doughnut',data:{labels:STATE.positions.map(p=>p.clase),datasets:[{data:STATE.positions.map(p=>Math.max(0,p.pctPortfolio)),backgroundColor:COLORS,borderColor:'#0f0f1a',borderWidth:3}]},options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
-
-  mkChart('chart-gp',{type:'bar',data:{labels:STATE.positions.map(p=>p.ticker),datasets:[{label:'G/P ARS',data:STATE.positions.map(p=>Math.round(p.gpARS)),backgroundColor:STATE.positions.map(p=>p.gpARS>=0?'rgba(16,185,129,0.7)':'rgba(239,68,68,0.7)'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b'},grid:{display:false}},y:{ticks:{color:'#64748b',callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}});
+// ── ACTIVOS ───────────────────────────────────────────────────────────────────
+function rActivos(){
+  const p=calc();
+  document.getElementById("a-tbody").innerHTML=S.pos.map((x,i)=>`<tr>
+    <td><span class="tkr">${x.tk}</span></td>
+    <td style="color:var(--mu);font-size:11px;max-width:120px;overflow:hidden;">${x.nm}</td>
+    <td style="font-size:11px;">${x.cl}</td>
+    <td style="color:var(--cl);">${fmt(x.un)}</td>
+    <td style="color:var(--cl);">${x.mo==="USD"?"USD "+fmt(x.co,2):"$"+fmt(x.co)}</td>
+    <td style="font-weight:bold;">${x.pr>0?(x.mo==="USD"?"USD "+fmt(x.pr,2):"$"+fmt(x.pr,0)):"⟳"}</td>
+    <td>$${fmt(x.pa,0)}</td>
+    <td>$${fmt(x.ca,0)}</td>
+    <td style="font-weight:bold;">$${fmt(x.ma,0)}</td>
+    <td class="${cc(x.ga)}" style="font-weight:bold;">$${fmt(Math.abs(x.ga),0)}</td>
+    <td class="${cc(x.gp)}" style="font-weight:bold;">${fp(x.gp)}</td>
+    <td>${fmt(x.pct,1)}%</td>
+    <td style="white-space:nowrap;">
+      <button class="btn bsm" style="padding:3px 7px;font-size:10px;margin-right:2px;" onclick="editA(${i})">✏</button>
+      <button class="btn bred bsm" style="padding:3px 7px;font-size:10px;" onclick="delA(${i})">✕</button>
+    </td></tr>`).join("");
+  document.getElementById("a-tfoot").innerHTML=`<tr style="background:#111127;"><td colspan="8" style="font-weight:bold;color:var(--gl);padding:8px;">TOTAL</td><td style="font-weight:bold;color:var(--gl);">$${fmt(p.ta,0)}</td><td class="${cc(p.ga)}" style="font-weight:bold;">$${fmt(Math.abs(p.ga),0)}</td><td class="${cc(p.gp)}" style="font-weight:bold;">${fp(p.gp)}</td><td style="color:var(--gl);">100%</td><td></td></tr>`;
+  mC("c-clase",{type:"doughnut",data:{labels:S.pos.map(x=>x.cl),datasets:[{data:S.pos.map(x=>Math.max(0,x.pct)),backgroundColor:CL,borderColor:"#0f0f1a",borderWidth:2}]},options:{plugins:{legend:{position:"right",labels:{color:"#94a3b8",font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
+  mC("c-gp",{type:"bar",data:{labels:S.pos.map(x=>x.tk),datasets:[{data:S.pos.map(x=>Math.round(x.ga)),backgroundColor:S.pos.map(x=>x.ga>=0?"rgba(16,185,129,0.7)":"rgba(239,68,68,0.7)"),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#64748b"},grid:{display:false}},y:{ticks:{color:"#64748b",callback:v=>"$"+fmt(v)},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
 }
 
 // ── RIESGO ────────────────────────────────────────────────────────────────────
-function renderRiesgo() {
-  const port = calcPortfolio();
-  const weights = STATE.positions.map(p=>p.pctPortfolio/100);
-  const stats = STATE.positions.map(calcStats);
-  const portVol = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
-  const portReturn = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
-  const portDD = weights.reduce((s,w,i)=>s+w*stats[i].maxDD,0);
-
-  document.getElementById('r-var95').textContent = fmtPct(portVol/Math.sqrt(252)*1.645*-1);
-  document.getElementById('r-var99').textContent = fmtPct(portVol/Math.sqrt(252)*2.326*-1);
-  document.getElementById('r-mdd').textContent = fmtPct(portDD);
-  document.getElementById('r-beta').textContent = '1.8 (apalancado SSO)';
-
-  // Stats table
-  document.getElementById('stats-tbody').innerHTML = STATE.positions.map((p,i)=>{
-    const s=calcStats(p);
-    return `<tr>
-      <td><span class="ticker">${p.ticker}</span></td>
-      <td class="${colorClass(s.rentAnual)}">${fmtPct(s.rentAnual)}</td>
-      <td class="down">${fmtPct(s.volAnual)}</td>
-      <td class="${s.sharpe>=1?'up':s.sharpe>=0.5?'gold':'down'}">${s.sharpe.toFixed(2)}</td>
-      <td class="${s.sortino>=1?'up':'gold'}">${s.sortino.toFixed(2)}</td>
-      <td class="down">${fmtPct(s.maxDD)}</td>
-    </tr>`;
-  }).join('');
-
-  // Correlación heatmap
-  const corr = calcCorrelation();
-  const tickers = STATE.positions.map(p=>p.ticker);
-  const heatHTML = `<table class="data-table" style="min-width:320px;">
-    <thead><tr><th></th>${tickers.map(t=>`<th>${t}</th>`).join('')}</tr></thead>
-    <tbody>${tickers.map(t1=>`
-      <tr><td style="font-weight:bold;color:var(--purple-light);">${t1}</td>
-      ${tickers.map(t2=>{
-        const v=corr[t1][t2];
-        let bg;
-        if(t1===t2) bg='rgba(245,158,11,0.4)';
-        else if(v>=0.7) bg='rgba(239,68,68,0.3)';
-        else if(v>=0.4) bg='rgba(245,158,11,0.2)';
-        else bg='rgba(16,185,129,0.2)';
-        return `<td style="background:${bg};text-align:center;font-weight:bold;">${v.toFixed(2)}</td>`;
-      }).join('')}</tr>
-    `).join('')}</tbody>
-  </table>`;
-  document.getElementById('heatmap-container').innerHTML = heatHTML;
-
-  // Diversificación
-  const clases = [...new Set(STATE.positions.map(p=>p.clase))];
-  const pctClase = clases.map(cl=>STATE.positions.filter(p=>p.clase===cl).reduce((s,p)=>s+p.pctPortfolio,0));
-  document.getElementById('diversificacion-content').innerHTML = clases.map((cl,i)=>`
-    <div style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
-        <span style="color:${COLORS[i]};">${cl}</span><span>${fmt(pctClase[i],1)}%</span>
-      </div>
-      <div class="prog-wrap"><div class="prog-bar" style="width:${pctClase[i]}%;background:${COLORS[i]};"></div></div>
-    </div>`).join('');
-
-  mkChart('chart-diversificacion',{type:'doughnut',data:{labels:clases,datasets:[{data:pctClase,backgroundColor:COLORS,borderColor:'#0f0f1a',borderWidth:2}]},options:{plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
-
-  // Scatter riesgo/retorno
-  mkChart('chart-scatter',{
-    type:'scatter',
-    data:{ datasets: STATE.positions.map((p,i)=>{
-      const s=calcStats(p);
-      return { label:p.ticker, data:[{x:s.volAnual*100,y:s.rentAnual*100}], backgroundColor:COLORS[i], pointRadius:10, pointHoverRadius:12 };
-    })},
-    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}, scales:{ x:{title:{display:true,text:'Volatilidad Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{title:{display:true,text:'Retorno Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
-  });
+function rRiesgo(){
+  const ws=S.pos.map(x=>x.pct/100);const st=S.pos.map(gSt);
+  const pv=Math.sqrt(ws.reduce((s,w,i)=>s+Math.pow(w*st[i].va,2),0));
+  const pd=ws.reduce((s,w,i)=>s+w*st[i].dd,0);
+  document.getElementById("r-v95").textContent=fp(-pv/Math.sqrt(252)*1.645);
+  document.getElementById("r-v99").textContent=fp(-pv/Math.sqrt(252)*2.326);
+  document.getElementById("r-dd").textContent=fp(pd);
+  document.getElementById("r-beta").textContent=S.pos.some(x=>x.cl==="ETF Apalancado"&&x.pct>20)?"~1.8 (apalancado)":"~1.0";
+  document.getElementById("st-tbody").innerHTML=S.pos.map(x=>{const s=gSt(x);return`<tr><td><span class="tkr">${x.tk}</span></td><td class="${cc(s.ra)}">${fp(s.ra)}</td><td class="dn">${fp(s.va)}</td><td class="${s.sh>=1?"up":s.sh>=.5?"go":"dn"}">${s.sh.toFixed(2)}</td><td class="${s.so>=1?"up":"go"}">${s.so.toFixed(2)}</td><td class="dn">${fp(s.dd)}</td></tr>`;}).join("");
+  // Correlation heatmap
+  const CORR={"ETF Apalancado":{"ETF Apalancado":1,"ETF Tecnología":.88,"ETF Global":.75,"Acción Internacional":.65,"Acción Argentina":.30,"Cripto":.35,"Commodity":.15,"Bono Soberano":-.05,"Plazo Fijo / FCI":.02},"ETF Tecnología":{"ETF Apalancado":.88,"ETF Tecnología":1,"ETF Global":.72,"Acción Internacional":.62,"Acción Argentina":.28,"Cripto":.40,"Commodity":.12,"Bono Soberano":-.04,"Plazo Fijo / FCI":.01},"ETF Global":{"ETF Apalancado":.75,"ETF Tecnología":.72,"ETF Global":1,"Acción Internacional":.80,"Acción Argentina":.35,"Cripto":.30,"Commodity":.20,"Bono Soberano":.05,"Plazo Fijo / FCI":.01},"Acción Internacional":{"ETF Apalancado":.65,"ETF Tecnología":.62,"ETF Global":.80,"Acción Internacional":1,"Acción Argentina":.40,"Cripto":.25,"Commodity":.22,"Bono Soberano":.08,"Plazo Fijo / FCI":.01},"Acción Argentina":{"ETF Apalancado":.30,"ETF Tecnología":.28,"ETF Global":.35,"Acción Internacional":.40,"Acción Argentina":1,"Cripto":.20,"Commodity":.25,"Bono Soberano":.45,"Plazo Fijo / FCI":.05},"Cripto":{"ETF Apalancado":.35,"ETF Tecnología":.40,"ETF Global":.30,"Acción Internacional":.25,"Acción Argentina":.20,"Cripto":1,"Commodity":.18,"Bono Soberano":-.10,"Plazo Fijo / FCI":0},"Commodity":{"ETF Apalancado":.15,"ETF Tecnología":.12,"ETF Global":.20,"Acción Internacional":.22,"Acción Argentina":.25,"Cripto":.18,"Commodity":1,"Bono Soberano":.10,"Plazo Fijo / FCI":.02},"Bono Soberano":{"ETF Apalancado":-.05,"ETF Tecnología":-.04,"ETF Global":.05,"Acción Internacional":.08,"Acción Argentina":.45,"Cripto":-.10,"Commodity":.10,"Bono Soberano":1,"Plazo Fijo / FCI":.60},"Plazo Fijo / FCI":{"ETF Apalancado":.02,"ETF Tecnología":.01,"ETF Global":.01,"Acción Internacional":.01,"Acción Argentina":.05,"Cripto":0,"Commodity":.02,"Bono Soberano":.60,"Plazo Fijo / FCI":1}};
+  const gc=(a,b)=>{if(a.tk===b.tk)return 1;const ca=a.cl,cb=b.cl;return CORR[ca]&&CORR[ca][cb]!=null?CORR[ca][cb]:.3;};
+  const tks=S.pos.map(x=>x.tk);
+  document.getElementById("hm").innerHTML=`<table class="tbl" style="min-width:${tks.length*80+80}px;"><thead><tr><th></th>${tks.map(t=>`<th>${t}</th>`).join("")}</tr></thead><tbody>${S.pos.map(p1=>`<tr><td style="font-weight:bold;color:var(--pl);">${p1.tk}</td>${S.pos.map(p2=>{const v=gc(p1,p2);const bg=p1===p2?"rgba(245,158,11,0.4)":v>=.7?"rgba(239,68,68,0.3)":v>=.4?"rgba(245,158,11,0.2)":"rgba(16,185,129,0.2)";return`<td style="background:${bg};text-align:center;font-weight:bold;">${v.toFixed(2)}</td>`;}).join("")}</tr>`).join("")}</tbody></table>`;
+  const cls=[...new Set(S.pos.map(x=>x.cl))];
+  const pc=cls.map(c=>S.pos.filter(x=>x.cl===c).reduce((s,x)=>s+x.pct,0));
+  document.getElementById("div-c").innerHTML=cls.map((c,i)=>`<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span style="color:${CL[i]};">${c}</span><span>${fmt(pc[i],1)}%</span></div><div class="pw"><div class="pb" style="width:${pc[i]}%;background:${CL[i]};"></div></div></div>`).join("");
+  mC("c-div",{type:"doughnut",data:{labels:cls,datasets:[{data:pc,backgroundColor:CL,borderColor:"#0f0f1a",borderWidth:2}]},options:{plugins:{legend:{labels:{color:"#94a3b8",font:{size:10},boxWidth:10}}},maintainAspectRatio:false}});
+  mC("c-sc",{type:"scatter",data:{datasets:S.pos.map((x,i)=>{const s=gSt(x);return{label:x.tk,data:[{x:s.va*100,y:s.ra*100}],backgroundColor:CL[i],pointRadius:10};})},options:{plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}},scales:{x:{title:{display:true,text:"Volatilidad (%)",color:"#64748b"},ticks:{color:"#64748b",callback:v=>v+"%"},grid:{color:"rgba(255,255,255,0.04)"}},y:{title:{display:true,text:"Retorno Anual (%)",color:"#64748b"},ticks:{color:"#64748b",callback:v=>v+"%"},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
 }
 
-// ── OPTIMIZACIÓN ─────────────────────────────────────────────────────────────
-function renderOptimizacion() {
-  const strategies = {
-    'Tu Cartera':     [0.50,0.30,0.10,0.10],
-    'Equiponderada':  [0.25,0.25,0.25,0.25],
-    'Max Sharpe':     [0.45,0.35,0.08,0.12],
-    'Min Volatilidad':[0.20,0.18,0.35,0.27],
-    'Min Drawdown':   [0.28,0.22,0.32,0.18],
-  };
-  const tickers = STATE.positions.map(p=>p.ticker);
-  const stats = STATE.positions.map(calcStats);
-  const strats = Object.keys(strategies);
-
-  document.getElementById('opt-pesos-tbody').innerHTML = tickers.map((t,ti)=>`
-    <tr><td><span class="ticker">${t}</span></td>
-    ${strats.map(s=>`<td style="text-align:center;">${(strategies[s][ti]*100).toFixed(0)}%</td>`).join('')}
-    </tr>`).join('');
-
-  const calcMetrics = weights => {
-    const r = weights.reduce((s,w,i)=>s+w*stats[i].rentAnual,0);
-    const v = Math.sqrt(weights.reduce((s,w,i)=>s+Math.pow(w*stats[i].volAnual,2),0));
-    const sh = v>0?(r-STATE.config.tlr_usd/100)/v:0;
-    const dd = weights.reduce((s,w,i)=>s+w*stats[i].maxDD,0);
-    return { r,v,sh,dd };
-  };
-
-  const metricRows = [
-    ['Rent. Anual.', m=>fmtPct(m.r), m=>colorClass(m.r)],
-    ['Vol. Anual.',  m=>fmtPct(m.v), ()=>'down'],
-    ['Sharpe Ratio', m=>m.sh.toFixed(2), m=>m.sh>=1?'up':m.sh>=0.5?'gold':'down'],
-    ['Max Drawdown', m=>fmtPct(m.dd), ()=>'down'],
-  ];
-
-  const metricsData = Object.fromEntries(strats.map(s=>[s,calcMetrics(strategies[s])]));
-  document.getElementById('opt-metrics-tbody').innerHTML = metricRows.map(([label,fmt2,cls])=>`
-    <tr><td style="color:var(--text-muted);">${label}</td>
-    ${strats.map(s=>`<td class="${cls(metricsData[s])}" style="text-align:center;font-weight:bold;">${fmt2(metricsData[s])}</td>`).join('')}
-    </tr>`).join('');
-
-  // Monte Carlo
-  const simData = Array.from({length:1000},()=>{
-    let w=[Math.random(),Math.random(),Math.random(),Math.random()];
-    const s=w.reduce((a,b)=>a+b,0);w=w.map(x=>Math.max(0.01,x/s));
-    const rn=w.reduce((a,b,i)=>a+b,0);w=w.map(x=>x/rn);
-    const m=calcMetrics(w);
-    return {x:m.v*100,y:m.r*100,sh:m.sh};
-  });
-
-  const optPoints = strats.slice(1).map((s,i)=>{
-    const m=calcMetrics(strategies[s]);
-    return {label:s,x:m.v*100,y:m.r*100,color:COLORS[i+1]};
-  });
-
-  mkChart('chart-montecarlo',{
-    type:'scatter',
-    data:{
-      datasets:[
-        { label:'Carteras simuladas', data:simData, backgroundColor:simData.map(d=>`rgba(124,58,237,${Math.min(0.6,d.sh/2+0.1)})`), pointRadius:3 },
-        ...optPoints.map(op=>({ label:op.label, data:[{x:op.x,y:op.y}], backgroundColor:op.color, pointRadius:10, pointStyle:'triangle' })),
-        { label:'Tu Cartera', data:[{x:calcMetrics(strategies['Tu Cartera']).v*100,y:calcMetrics(strategies['Tu Cartera']).r*100}], backgroundColor:'#f59e0b', pointRadius:12, pointStyle:'rectRot' }
-      ]
-    },
-    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}}, scales:{ x:{title:{display:true,text:'Volatilidad (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{title:{display:true,text:'Retorno Anual (%)',color:'#64748b'},ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
-  });
+// ── OPTIMIZACIÓN ──────────────────────────────────────────────────────────────
+function rOpt(){
+  const n=S.pos.length;
+  const eW=Array(n).fill(1/n);
+  const sum=arr=>arr.reduce((a,b)=>a+b,0);
+  const norm=arr=>{const s=sum(arr);return arr.map(x=>x/s);};
+  const msW=norm(S.pos.map(x=>gSt(x).sh));
+  const mvW=norm(S.pos.map(x=>1/gSt(x).va));
+  const mdW=norm(S.pos.map(x=>1/Math.abs(gSt(x).dd)));
+  const cW=S.pos.map(x=>x.pct/100);
+  const sts={"Tu Cartera":cW,"Equiponderada":eW,"Max Sharpe":msW,"Min Volatilidad":mvW,"Min Drawdown":mdW};
+  const sk=Object.keys(sts);
+  const tks=S.pos.map(x=>x.tk);
+  document.getElementById("op-h").innerHTML=`<tr><th>Activo</th>${sk.map(s=>`<th>${s}</th>`).join("")}</tr>`;
+  document.getElementById("op-p").innerHTML=tks.map((t,i)=>`<tr><td><span class="tkr">${t}</span></td>${sk.map(s=>`<td style="text-align:center;">${(sts[s][i]*100).toFixed(0)}%</td>`).join("")}</tr>`).join("");
+  const cM=w=>{const st=S.pos.map(gSt);const r=w.reduce((s,wi,i)=>s+wi*st[i].ra,0);const v=Math.sqrt(w.reduce((s,wi,i)=>s+Math.pow(wi*st[i].va,2),0));const sh=v>0?(r-S.cfg.tlr_usd/100)/v:0;const dd=w.reduce((s,wi,i)=>s+wi*st[i].dd,0);return{r,v,sh,dd};};
+  const mrows=[["Rent. Anual.",m=>fp(m.r),m=>cc(m.r)],["Vol. Anual.",m=>fp(m.v),()=>"dn"],["Sharpe",m=>m.sh.toFixed(2),m=>m.sh>=1?"up":m.sh>=.5?"go":"dn"],["Max DD",m=>fp(m.dd),()=>"dn"]];
+  const md=Object.fromEntries(sk.map(s=>[s,cM(sts[s])]));
+  document.getElementById("op-mh").innerHTML=`<tr><th>Métrica</th>${sk.map(s=>`<th>${s}</th>`).join("")}</tr>`;
+  document.getElementById("op-m").innerHTML=mrows.map(([l,f,c])=>`<tr><td style="color:var(--mu);">${l}</td>${sk.map(s=>`<td class="${c(md[s])}" style="text-align:center;font-weight:bold;">${f(md[s])}</td>`).join("")}</tr>`).join("");
+  const sim=Array.from({length:1000},()=>{let w=Array.from({length:n},()=>Math.random());const s=sum(w);w=w.map(x=>Math.max(.01,x/s));const ts=sum(w);w=w.map(x=>x/ts);const m=cM(w);return{x:m.v*100,y:m.r*100,sh:m.sh};});
+  mC("c-mc",{type:"scatter",data:{datasets:[{label:"Simuladas",data:sim,backgroundColor:sim.map(d=>`rgba(124,58,237,${Math.min(.6,d.sh/2+.1)})`),pointRadius:3},...sk.slice(1).map((s,i)=>{const m=cM(sts[s]);return{label:s,data:[{x:m.v*100,y:m.r*100}],backgroundColor:CL[i+1],pointRadius:9,pointStyle:"triangle"};}),{label:"Tu Cartera",data:[{x:cM(cW).v*100,y:cM(cW).r*100}],backgroundColor:"#f59e0b",pointRadius:12,pointStyle:"rectRot"}]},options:{plugins:{legend:{labels:{color:"#94a3b8",font:{size:10},boxWidth:10}}},scales:{x:{title:{display:true,text:"Volatilidad (%)",color:"#64748b"},ticks:{color:"#64748b",callback:v=>v+"%"},grid:{color:"rgba(255,255,255,0.04)"}},y:{title:{display:true,text:"Retorno Anual (%)",color:"#64748b"},ticks:{color:"#64748b",callback:v=>v+"%"},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
 }
 
-// ── BENCHMARK ────────────────────────────────────────────────────────────────
-function renderBenchmark() {
-  const port = calcPortfolio();
-  const portPct = port.gpPct;
-  const spyEst = 22.5; // estimated SPY YTD
-  const alpha = portPct - spyEst;
-
-  document.getElementById('b-port').innerHTML = `<span class="${colorClass(portPct)}">${fmtPct(portPct)}</span>`;
-  document.getElementById('b-spy').textContent = fmtPct(spyEst)+' (estimado)';
-  document.getElementById('b-alpha').innerHTML = `<span class="${colorClass(alpha)}">${fmtPct(alpha)}</span>`;
-
-  const periods = [
-    ['1 Mes', portPct*0.15, spyEst*0.10],
-    ['3 Meses', portPct*0.35, spyEst*0.25],
-    ['6 Meses', portPct*0.65, spyEst*0.50],
-    ['1 Año', portPct*0.90, spyEst*0.85],
-    ['Desde inicio', portPct, spyEst],
-  ];
-
-  document.getElementById('bench-tbody').innerHTML = periods.map(([p,jp,spy])=>{
-    const diff=jp-spy;
-    return `<tr>
-      <td>${p}</td>
-      <td class="${colorClass(jp)}" style="font-weight:bold;">${fmtPct(jp)}</td>
-      <td class="${colorClass(spy)}">${fmtPct(spy)}</td>
-      <td class="${colorClass(diff)}" style="font-weight:bold;">${fmtPct(diff)}</td>
-    </tr>`;
-  }).join('');
-
-  // Evolución comparativa
-  const months = ['Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
-  const portEvol = months.map((_,i)=>100*(1+portPct/100*i/6));
-  const spyEvol  = months.map((_,i)=>100*(1+spyEst/100*i/6));
-  mkChart('chart-bench-evol',{
-    type:'line',
-    data:{
-      labels:months,
-      datasets:[
-        { label:'Mi Portafolio', data:portEvol, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.4 },
-        { label:'SPY (estimado)', data:spyEvol, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.05)', fill:true, tension:0.4, borderDash:[5,5] },
-      ]
-    },
-    options:{ plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}, scales:{ x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#64748b',callback:v=>v.toFixed(0)},grid:{color:'rgba(255,255,255,0.04)'}} }, maintainAspectRatio:false }
-  });
+// ── BENCHMARK ─────────────────────────────────────────────────────────────────
+function rBench(){
+  const p=calc();const pp=p.gp;const spy=22.5;
+  document.getElementById("b-p").innerHTML=`<span class="${cc(pp)}">${fp(pp)}</span>`;
+  document.getElementById("b-s").textContent=fp(spy)+" (est.)";
+  document.getElementById("b-a").innerHTML=`<span class="${cc(pp-spy)}">${fp(pp-spy)}</span>`;
+  const pers=[["1 Mes",pp*.15,spy*.10],["3 Meses",pp*.35,spy*.25],["6 Meses",pp*.65,spy*.50],["1 Año",pp*.90,spy*.85],["Desde inicio",pp,spy]];
+  document.getElementById("b-tbody").innerHTML=pers.map(([l,jp,s])=>`<tr><td>${l}</td><td class="${cc(jp)}" style="font-weight:bold;">${fp(jp)}</td><td class="${cc(s)}">${fp(s)}</td><td class="${cc(jp-s)}" style="font-weight:bold;">${fp(jp-s)}</td></tr>`).join("");
+  const mths=["Oct","Nov","Dic","Ene","Feb","Mar","Abr"];
+  mC("c-be",{type:"line",data:{labels:mths,datasets:[{label:"Mi Portafolio",data:mths.map((_,i)=>100*(1+pp/100*i/6)),borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,0.1)",fill:true,tension:.4},{label:"SPY",data:mths.map((_,i)=>100*(1+spy/100*i/6)),borderColor:"#06b6d4",backgroundColor:"rgba(6,182,212,0.05)",fill:true,tension:.4,borderDash:[5,5]}]},options:{plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
 }
 
 // ── FINANZAS ──────────────────────────────────────────────────────────────────
-function renderFinanzas() {
-  // Ingresos inputs
-  const cont = document.getElementById('ingresos-inputs');
-  const meses = Object.keys(STATE.ingresos);
-  cont.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
-    meses.map(m=>`
-      <div class="input-group" style="margin-bottom:0;">
-        <label class="input-label">${m}</label>
-        <input type="number" class="inp" value="${STATE.ingresos[m]}" onchange="STATE.ingresos['${m}']=+this.value;saveAll();renderFinanzas();" style="padding:6px 10px;font-size:12px;">
-      </div>`).join('') + '</div>';
-
-  const vals = Object.values(STATE.ingresos).filter(v=>v>0);
-  const total = vals.reduce((a,b)=>a+b,0);
-  const avg = vals.length?total/vals.length:0;
-  document.getElementById('ingresos-summary').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
-      <div><span style="color:var(--text-muted);">Total anual:</span> <strong>$${fmt(total)}</strong></div>
-      <div><span style="color:var(--text-muted);">Promedio:</span> <strong>$${fmt(avg,0)}</strong></div>
-      <div><span style="color:var(--text-muted);">Mejor mes:</span> <strong class="up">$${fmt(Math.max(...Object.values(STATE.ingresos)))}</strong></div>
-    </div>`;
-
-  mkChart('chart-ingresos',{
-    type:'bar',
-    data:{labels:meses,datasets:[{label:'Ingresos ARS',data:Object.values(STATE.ingresos),backgroundColor:'rgba(124,58,237,0.7)',borderRadius:5}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}
-  });
-
-  // Gastos
-  const gastosCont = document.getElementById('gastos-inputs');
-  const cats = Object.keys(STATE.gastos);
-  gastosCont.innerHTML = cats.map(cat=>`
-    <div class="input-group" style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-        <label class="input-label" style="margin:0;">${cat}</label>
-        <input type="number" class="inp" value="${STATE.gastos[cat]}" onchange="STATE.gastos['${cat}']=+this.value;saveAll();renderFinanzas();" style="width:120px;padding:4px 8px;font-size:12px;">
-      </div>
-    </div>`).join('');
-
-  mkChart('chart-gastos',{
-    type:'bar',
-    data:{labels:cats,datasets:[{label:'Gasto ARS',data:Object.values(STATE.gastos),backgroundColor:COLORS.map(c=>c+'bb'),borderRadius:5}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}}},maintainAspectRatio:false}
-  });
-
-  // Presupuesto
-  const totalGastos = Object.values(STATE.gastos).reduce((a,b)=>a+b,0);
-  const ingresoEstim = avg || 120000;
-  const ahorro = ingresoEstim - totalGastos;
-  const pctAhorro = ingresoEstim>0?ahorro/ingresoEstim*100:0;
-  const semClass = pctAhorro>=20?'sem-green':pctAhorro>=10?'sem-yellow':'sem-red';
-  document.getElementById('presupuesto-content').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Ingreso Estimado</div><div class="kpi-value gold">$${fmt(ingresoEstim,0)}</div></div>
-    <div class="kpi"><div class="kpi-label">Total Gastos</div><div class="kpi-value down">$${fmt(totalGastos,0)}</div></div>
-    <div class="kpi"><div class="kpi-label">Ahorro Proyectado</div>
-      <div class="kpi-value ${colorClass(ahorro)}">$${fmt(Math.abs(ahorro),0)}</div>
-      <div class="kpi-sub"><span class="semaforo ${semClass}" style="font-size:10px;padding:3px 8px;">${pctAhorro>=20?'🟢 VERDE':pctAhorro>=10?'🟡 AMARILLO':'🔴 ROJO'} — ${fmt(pctAhorro,1)}% del ingreso</span></div>
-    </div>`;
-
-  // Metas ahorro
-  const metasCont = document.getElementById('ahorro-metas');
-  metasCont.innerHTML = STATE.metas.map((m,i)=>{
-    const pct = m.objetivo>0?Math.min(100,m.actual/m.objetivo*100):0;
-    const falta = Math.max(0,m.objetivo-m.actual);
-    return `<div style="margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-        <span style="font-size:12px;font-weight:bold;color:${COLORS[i%COLORS.length]};">${m.nombre}</span>
-        <span style="font-size:11px;color:var(--text-muted);">${fmt(pct,1)}% — Falta $${fmt(falta,0)}</span>
-      </div>
-      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${COLORS[i%COLORS.length]};"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px;">
-        <span>$${fmt(m.actual,0)} ahorrado</span><span>Meta: $${fmt(m.objetivo,0)}</span>
-      </div>
-    </div>`;
-  }).join('');
+function rFin(){
+  const ms=Object.keys(S.ing);
+  document.getElementById("ing-in").innerHTML="<div style='display:grid;grid-template-columns:1fr 1fr;gap:6px;'>"+ms.map(m=>`<div class="ig" style="margin-bottom:0;"><label class="il">${m}</label><input type="number" class="inp" value="${S.ing[m]}" onchange="S.ing['${m}']=+this.value;saveAll();rFin();" style="padding:5px 8px;font-size:12px;"></div>`).join("")+"</div>";
+  const vals=Object.values(S.ing).filter(v=>v>0);const total=vals.reduce((a,b)=>a+b,0);const avg=vals.length?total/vals.length:0;
+  document.getElementById("ing-sum").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;"><div><span style="color:var(--mu);">Total:</span> <strong>$${fmt(total)}</strong></div><div><span style="color:var(--mu);">Promedio:</span> <strong>$${fmt(avg,0)}</strong></div><div><span style="color:var(--mu);">Mejor:</span> <strong class="up">$${fmt(Math.max(0,...Object.values(S.ing)))}</strong></div></div>`;
+  mC("c-ing",{type:"bar",data:{labels:ms,datasets:[{data:Object.values(S.ing),backgroundColor:"rgba(124,58,237,0.7)",borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#64748b",font:{size:9}},grid:{display:false}},y:{ticks:{color:"#64748b",font:{size:9},callback:v=>"$"+fmt(v)},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
+  const cs=Object.keys(S.gas);
+  document.getElementById("gas-in").innerHTML=cs.map(c=>`<div class="ig" style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><label class="il" style="margin:0;flex:1;">${c}</label><input type="number" class="inp" value="${S.gas[c]}" onchange="S.gas['${c}']=+this.value;saveAll();rFin();" style="width:110px;padding:5px 8px;font-size:12px;"></div></div>`).join("");
+  const tg=Object.values(S.gas).reduce((a,b)=>a+b,0);
+  mC("c-gas",{type:"bar",data:{labels:cs,datasets:[{data:Object.values(S.gas),backgroundColor:CL.map(c=>c+"bb"),borderRadius:4}]},options:{indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#64748b",font:{size:9},callback:v=>"$"+fmt(v)},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#64748b",font:{size:10}},grid:{display:false}}},maintainAspectRatio:false}});
+  const ing=avg||120000;const ah=ing-tg;const pah=ing>0?ah/ing*100:0;
+  const sc=pah>=20?"sg":pah>=10?"sy":"sr";
+  document.getElementById("pres-c").innerHTML=`<div class="kpi"><div class="kl">INGRESO EST.</div><div class="kv go">$${fmt(ing,0)}</div></div><div class="kpi"><div class="kl">TOTAL GASTOS</div><div class="kv dn">$${fmt(tg,0)}</div></div><div class="kpi"><div class="kl">AHORRO</div><div class="kv ${cc(ah)}">$${fmt(Math.abs(ah),0)}</div><div class="ks"><span class="sem ${sc}" style="font-size:10px;padding:3px 8px;">${pah>=20?"🟢 VERDE":pah>=10?"🟡 AMARILLO":"🔴 ROJO"} — ${fmt(pah,1)}%</span></div></div>`;
+  document.getElementById("metas-c").innerHTML=S.metas.map((m,i)=>{const pct=m.ob>0?Math.min(100,m.ac/m.ob*100):0;return`<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:bold;color:${CL[i%CL.length]};">${m.nm}</span><div style="display:flex;gap:4px;align-items:center;"><span style="font-size:11px;color:var(--mu);">${fmt(pct,1)}%</span><button class="btn bsm" style="padding:2px 6px;font-size:9px;" onclick="editM(${i})">✏</button><button class="btn bred bsm" style="padding:2px 6px;font-size:9px;" onclick="delM(${i})">✕</button></div></div><div class="pw"><div class="pb" style="width:${pct}%;background:${CL[i%CL.length]};"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-top:2px;"><span>$${fmt(m.ac,0)} ahorrado</span><span>Meta: $${fmt(m.ob,0)}</span></div></div>`;}).join("");
 }
+window.rFin=rFin;
 
 // ── SIMULADORES ───────────────────────────────────────────────────────────────
-function renderSimuladores() {
-  updateSim();
-  calcAhorro();
-  calcAhorroB();
-}
+function rSims(){updSim();calcA();calcB();}
+window.setSc=(id,btn)=>{
+  const sc={d20:[20,0,0],m15:[0,-15,-10],inf:[0,0,0],cr:[30,-20,-15]};
+  const[d,s,m]=sc[id];document.getElementById("s-d").value=d;document.getElementById("s-s").value=s;document.getElementById("s-m").value=m;
+  document.querySelectorAll(".scb").forEach(b=>b.classList.remove("sel"));btn.classList.add("sel");updSim();
+};
+window.updSim=()=>{
+  const d=+document.getElementById("s-d").value||0,s=+document.getElementById("s-s").value||0;
+  document.getElementById("s-dv").textContent=(d>0?"+":"")+d+"%";
+  document.getElementById("s-sv").textContent=(s>0?"+":"")+s+"%";
+  document.getElementById("s-mv").textContent=(+document.getElementById("s-m").value>0?"+":" ")+document.getElementById("s-m").value+"%";
+  const p=calc();const tcN=S.cfg.mep*(1+d/100);let sim=0;
+  S.pos.forEach(x=>{const pa=x.mo==="USD"?x.pr*(1+s/100)*tcN:x.pr;sim+=pa*x.un;});
+  const diff=sim-p.ta;const dp=p.ta>0?diff/p.ta*100:0;
+  document.getElementById("sim-r").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;"><div><span style="color:var(--mu);">Actual:</span><br><strong>$${fmt(p.ta,0)}</strong></div><div><span style="color:var(--mu);">Simulado:</span><br><strong class="${cc(diff)}">$${fmt(sim,0)}</strong></div><div><span style="color:var(--mu);">Impacto:</span><br><strong class="${cc(diff)}">$${fmt(Math.abs(diff),0)}</strong></div><div><span style="color:var(--mu);">Variación:</span><br><strong class="${cc(dp)}">${fp(dp)}</strong></div></div>`;
+};
+window.calcA=()=>{
+  const mt=+document.getElementById("sa-mt").value||500000;const pl=+document.getElementById("sa-pl").value||24;
+  const r=S.cfg.tlr_usd/100/12;const cu=r>0?mt*r/(Math.pow(1+r,pl)-1):mt/pl;
+  document.getElementById("sa-ra").textContent=`Necesitás ahorrar $${fmt(Math.round(cu),0)} por mes`;
+  const dt=Array.from({length:pl},(_,m)=>{let a=0;for(let i=0;i<=m;i++)a=a*(1+r)+cu;return Math.round(a);});
+  mC("c-aho",{type:"line",data:{labels:Array.from({length:pl},(_,i)=>`M${i+1}`),datasets:[{label:"Capital",data:dt,borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,0.15)",fill:true,tension:.4,pointRadius:0},{label:"Meta",data:Array(pl).fill(mt),borderColor:"#f59e0b",borderDash:[5,5],pointRadius:0,fill:false}]},options:{plugins:{legend:{labels:{color:"#94a3b8",font:{size:10}}}},scales:{x:{ticks:{color:"#64748b",font:{size:9},maxTicksLimit:8},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#64748b",font:{size:9},callback:v=>"$"+fmt(v)},grid:{color:"rgba(255,255,255,0.04)"}}},maintainAspectRatio:false}});
+};
+window.calcB=()=>{
+  const mt=+document.getElementById("sb-mt").value||500000;const cu=+document.getElementById("sb-cu").value||30000;
+  const r=S.cfg.tlr_usd/100/12;let ms=r>0?Math.log(mt/(mt-cu/r))/Math.log(1+r):mt/cu;
+  if(isNaN(ms)||!isFinite(ms)||ms<0){document.getElementById("sb-ra").textContent="La cuota es muy baja";return;}
+  const a=Math.floor(ms/12);const mr=Math.round(ms%12);
+  document.getElementById("sb-ra").textContent=`Llegás en ${Math.round(ms)} meses (${a} años${mr?" y "+mr+" meses":""})`;
+};
 
-function setScenario(id) {
-  const scenarios = {
-    dolar20:  [20,0,0],
-    caida15:  [0,-15,-10],
-    inflacion:[0,0,0],
-    crisis:   [30,-20,-15],
-  };
-  const [d,s,m]=scenarios[id];
-  document.getElementById('sim-dolar').value=d;
-  document.getElementById('sim-spy').value=s;
-  document.getElementById('sim-merv').value=m;
-  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('selected'));
-  event.target.classList.add('selected');
-  updateSim();
-}
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+window.syncCfg=()=>{
+  const ids={mep:"c-mep",oficial:"c-ofi",blue:"c-blu",inflacion:"c-inf",tlr_ars:"c-ta",tlr_usd:"c-tu",nombre:"c-nom",fecha_inicio:"c-fec",capital_inicial:"c-cap",sem_verde:"c-sg",sem_rojo:"c-sr"};
+  for(const[k,id]of Object.entries(ids)){const el=document.getElementById(id);if(el&&S.cfg[k]!==undefined)el.value=S.cfg[k];}
+};
+let cfgT=null;
+window.saveCfgD=()=>{
+  const ids={mep:"c-mep",oficial:"c-ofi",blue:"c-blu",inflacion:"c-inf",tlr_ars:"c-ta",tlr_usd:"c-tu",nombre:"c-nom",fecha_inicio:"c-fec",capital_inicial:"c-cap",sem_verde:"c-sg",sem_rojo:"c-sr"};
+  for(const[k,id]of Object.entries(ids)){const el=document.getElementById(id);if(el)S.cfg[k]=isNaN(+el.value)?el.value:+el.value;}
+  clearTimeout(cfgT);cfgT=setTimeout(saveAll,1200);
+};
 
-function updateSim() {
-  const d=+document.getElementById('sim-dolar').value||0;
-  const s=+document.getElementById('sim-spy').value||0;
-  document.getElementById('sim-dolar-val').textContent=(d>0?'+':'')+d+'%';
-  document.getElementById('sim-spy-val').textContent=(s>0?'+':'')+s+'%';
-  document.getElementById('sim-merv-val').textContent=(+document.getElementById('sim-merv').value>0?'+':'')+document.getElementById('sim-merv').value+'%';
+// ── ACTIVOS CRUD ──────────────────────────────────────────────────────────────
+window.openAddA=()=>{
+  document.getElementById("ma-idx").value=-1;document.getElementById("m-activo-title").textContent="Agregar Activo";
+  ["ma-tk","ma-nm"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("ma-cl").value="Acción Internacional";document.getElementById("ma-mo").value="USD";
+  document.getElementById("ma-un").value="0";document.getElementById("ma-co").value="0";document.getElementById("ma-pm").value="0";
+  document.getElementById("ma-pm-wrap").style.display="none";
+  document.getElementById("ma-cl").onchange=function(){document.getElementById("ma-pm-wrap").style.display=["Bono Soberano","Plazo Fijo / FCI"].includes(this.value)?"block":"none";};
+  document.getElementById("m-activo").classList.add("open");
+};
+window.editA=i=>{
+  const x=S.pos[i];document.getElementById("ma-idx").value=i;document.getElementById("m-activo-title").textContent="Editar Activo";
+  document.getElementById("ma-tk").value=x.tk;document.getElementById("ma-nm").value=x.nm;document.getElementById("ma-cl").value=x.cl;document.getElementById("ma-mo").value=x.mo;document.getElementById("ma-un").value=x.un;document.getElementById("ma-co").value=x.co;document.getElementById("ma-pm").value=x.pm||0;
+  document.getElementById("ma-pm-wrap").style.display=["Bono Soberano","Plazo Fijo / FCI"].includes(x.cl)?"block":"none";
+  document.getElementById("m-activo").classList.add("open");
+};
+window.saveActivo=()=>{
+  const idx=+document.getElementById("ma-idx").value;const tk=document.getElementById("ma-tk").value.trim().toUpperCase();
+  if(!tk){toast("⚠ Ingresá un ticker");return;}
+  const pos={tk,nm:document.getElementById("ma-nm").value.trim()||tk,cl:document.getElementById("ma-cl").value,mo:document.getElementById("ma-mo").value,un:+document.getElementById("ma-un").value||0,co:+document.getElementById("ma-co").value||0,pm:+document.getElementById("ma-pm").value||0,pr:0,ch:0,pa:0,ca:0,ma:0,ga:0,gp:0,pct:0};
+  if(idx>=0)S.pos[idx]=pos;else S.pos.push(pos);
+  closeM("m-activo");saveAll();refreshAll();toast(idx>=0?"✓ Activo actualizado":"✓ Activo agregado");
+};
+window.delA=i=>{if(!confirm(`¿Eliminar ${S.pos[i].tk}?`))return;S.pos.splice(i,1);saveAll();rActivos();toast("✓ Eliminado");};
 
-  const port = calcPortfolio();
-  const tcNuevo = STATE.config.mep*(1+d/100);
-  let simTotal = 0;
-  STATE.positions.forEach(p=>{
-    const priceNuevo = p.price*(1+s/100);
-    const priceARSnuevo = p.moneda==='USD'?priceNuevo*tcNuevo:p.price;
-    simTotal += priceARSnuevo*p.units;
-  });
-  const diff = simTotal - port.totalARS;
-  const diffPct = port.totalARS>0?diff/port.totalARS*100:0;
+// ── METAS CRUD ────────────────────────────────────────────────────────────────
+window.openAddM=()=>{document.getElementById("mm-idx").value=-1;document.getElementById("m-meta-title").textContent="Agregar Meta";document.getElementById("mm-nm").value="";document.getElementById("mm-ob").value="500000";document.getElementById("mm-ac").value="0";document.getElementById("m-meta").classList.add("open");};
+window.editM=i=>{const m=S.metas[i];document.getElementById("mm-idx").value=i;document.getElementById("m-meta-title").textContent="Editar Meta";document.getElementById("mm-nm").value=m.nm;document.getElementById("mm-ob").value=m.ob;document.getElementById("mm-ac").value=m.ac;document.getElementById("m-meta").classList.add("open");};
+window.saveMeta=()=>{const idx=+document.getElementById("mm-idx").value;const mt={nm:document.getElementById("mm-nm").value.trim()||"Meta",ob:+document.getElementById("mm-ob").value||0,ac:+document.getElementById("mm-ac").value||0};if(idx>=0)S.metas[idx]=mt;else S.metas.push(mt);closeM("m-meta");saveAll();rFin();toast(idx>=0?"✓ Meta actualizada":"✓ Meta agregada");};
+window.delM=i=>{if(!confirm("¿Eliminar esta meta?"))return;S.metas.splice(i,1);saveAll();rFin();};
+window.closeM=id=>document.getElementById(id).classList.remove("open");
 
-  document.getElementById('sim-resultado').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
-      <div><span style="color:var(--text-muted);">Valor actual:</span><br><strong>$${fmt(port.totalARS,0)}</strong></div>
-      <div><span style="color:var(--text-muted);">Valor simulado:</span><br><strong class="${colorClass(simTotal-port.totalARS)}">$${fmt(simTotal,0)}</strong></div>
-      <div><span style="color:var(--text-muted);">Impacto ARS:</span><br><strong class="${colorClass(diff)}">$${fmt(Math.abs(diff),0)}</strong></div>
-      <div><span style="color:var(--text-muted);">Variación:</span><br><strong class="${colorClass(diffPct)}">${fmtPct(diffPct)}</strong></div>
-    </div>`;
-}
-
-function calcAhorro() {
-  const meta = +document.getElementById('meta-monto').value||500000;
-  const plazo = +document.getElementById('meta-plazo').value||24;
-  const rate = STATE.config.tlr_usd/100/12;
-  const cuota = rate>0?meta*rate/(Math.pow(1+rate,plazo)-1):meta/plazo;
-  document.getElementById('meta-resultado-a').textContent = `Necesitás ahorrar $${fmt(Math.round(cuota),0)} ARS por mes`;
-
-  const labels = Array.from({length:plazo},(_,i)=>i+1);
-  const data = labels.map(m=>{
-    let acc=0;
-    for(let i=0;i<m;i++) acc=acc*(1+rate)+cuota;
-    return Math.round(acc);
-  });
-  mkChart('chart-ahorro-proyeccion',{
-    type:'line',
-    data:{labels:labels.map(l=>`M${l}`),datasets:[
-      {label:'Capital acumulado',data,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.15)',fill:true,tension:0.4,pointRadius:0},
-      {label:'Meta',data:Array(plazo).fill(meta),borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,fill:false}
-    ]},
-    options:{plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}},scales:{x:{ticks:{color:'#64748b',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#64748b',font:{size:9},callback:v=>'$'+fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}},maintainAspectRatio:false}
-  });
-}
-
-function calcAhorroB() {
-  const meta = +document.getElementById('meta-b-monto').value||500000;
-  const cuota = +document.getElementById('meta-b-cuota').value||30000;
-  const rate = STATE.config.tlr_usd/100/12;
-  let meses;
-  if(rate>0) {
-    meses = Math.log(meta/(meta-cuota/rate))/Math.log(1+rate);
-  } else {
-    meses = meta/cuota;
-  }
-  if(isNaN(meses)||!isFinite(meses)||meses<0) {
-    document.getElementById('meta-resultado-b').textContent = 'La cuota debe ser mayor al interés mensual generado';
-    return;
-  }
-  const años = Math.floor(meses/12);
-  const mesesRest = Math.round(meses%12);
-  document.getElementById('meta-resultado-b').textContent = `Llegás en ${Math.round(meses)} meses (${años} años${mesesRest?' y '+mesesRest+' meses':''})`;
-}
-
-// ── CONFIG RENDER ─────────────────────────────────────────────────────────────
-function renderConfig() {
-  document.getElementById('cfg-mep').value = STATE.config.mep;
-  document.getElementById('cfg-oficial').value = STATE.config.oficial;
-  document.getElementById('cfg-blue').value = STATE.config.blue;
-  document.getElementById('cfg-inflacion').value = STATE.config.inflacion;
-  document.getElementById('cfg-tlr-ars').value = STATE.config.tlr_ars;
-  document.getElementById('cfg-tlr-usd').value = STATE.config.tlr_usd;
-  document.getElementById('cfg-nombre').value = STATE.config.nombre;
-  document.getElementById('cfg-fecha').value = STATE.config.fecha_inicio;
-  document.getElementById('cfg-capital').value = STATE.config.capital_inicial;
-  document.getElementById('cfg-ypfd').value = STATE.config.ypfd_precio;
-
-  const cont = document.getElementById('posiciones-config');
-  cont.innerHTML = STATE.positions.map((p,i)=>`
-    <div style="background:#111127;border-radius:8px;padding:10px;margin-bottom:8px;">
-      <div style="font-size:12px;font-weight:bold;color:${COLORS[i]};margin-bottom:8px;">${p.ticker} — ${p.nombre}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div>
-          <label class="input-label">N° Unidades</label>
-          <input type="number" class="inp" value="${p.units}" onchange="STATE.positions[${i}].units=+this.value;" style="font-size:12px;padding:6px;">
-        </div>
-        <div>
-          <label class="input-label">Costo unitario (${p.moneda})</label>
-          <input type="number" class="inp" value="${p.cost}" onchange="STATE.positions[${i}].cost=+this.value;" style="font-size:12px;padding:6px;">
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function savePositions() {
-  saveAll();
-  calcPortfolio();
-  renderDashboard();
-  alert('Posiciones guardadas ✓');
-}
-
-// ── RENDER ALL ────────────────────────────────────────────────────────────────
-function renderAll() {
-  const activePage = document.querySelector('.page.active');
-  if(activePage) {
-    const id = activePage.id.replace('page-','');
-    renderPage(id);
-  }
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-loadStorage();
-calcPortfolio();
-renderDashboard();
-refreshPrices();
-
-// Auto-refresh every 5 minutes
-setInterval(refreshPrices, 5*60*1000);
+setInterval(refreshAll,5*60*1000);
 </script>
 </body>
 </html>
