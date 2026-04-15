@@ -1,0 +1,125 @@
+{
+  "cfg": {
+    "mep": 1436,
+    "oficial": 1392,
+    "blue": 1405,
+    "inflacion": 50,
+    "tlr_ars": 45,
+    "tlr_usd": 4.3,
+    "nombre": "Juan Pablo Croissant",
+    "fecha_inicio": "2026-04-04",
+    "capital_inicial": 300000,
+    "sem_verde": 8,
+    "sem_rojo": -10
+  },
+  "pos": [
+    {
+      "tk": "SPY",
+      "nm": "S&P500",
+      "cl": "ETF Apalancado",
+      "mo": "ARS",
+      "un": 2,
+      "co": 49800,
+      "pm": 0,
+      "pr": 0,
+      "ch": 0,
+      "pa": 0,
+      "ca": 99600,
+      "ma": 0,
+      "ga": -99600,
+      "gp": -100,
+      "pct": 0
+    },
+    {
+      "tk": "XLK",
+      "nm": "Technology Select SPDR",
+      "cl": "ETF Tecnología",
+      "mo": "USD",
+      "un": 24,
+      "co": 3.13,
+      "pr": 0,
+      "ch": 0,
+      "pm": 0,
+      "pa": 212441.84,
+      "ca": 107872.32,
+      "ma": 5098604.16,
+      "ga": 4990731.84,
+      "gp": 4626.517571884984,
+      "pct": 93.97341633450318
+    },
+    {
+      "tk": "YPFD",
+      "nm": "YPF S.A.",
+      "cl": "Acción Argentina",
+      "mo": "ARS",
+      "un": 0,
+      "co": 5000,
+      "pr": 0,
+      "ch": 0,
+      "pm": 57000,
+      "pa": 57000,
+      "ca": 0,
+      "ma": 0,
+      "ga": 0,
+      "gp": 0,
+      "pct": 0
+    },
+    {
+      "tk": "KO",
+      "nm": "Coca-Cola Co.",
+      "cl": "Acción Intl.",
+      "mo": "USD",
+      "un": 3,
+      "co": 76,
+      "pr": 0,
+      "ch": 0,
+      "pm": 0,
+      "pa": 108992.40000000001,
+      "ca": 327408,
+      "ma": 326977.2,
+      "ga": -430.79999999998836,
+      "gp": -0.1315789473684175,
+      "pct": 6.026583665496816
+    }
+  ],
+  "ing": {
+    "Ene": 0,
+    "Feb": 0,
+    "Mar": 0,
+    "Abr": 120000,
+    "May": 0,
+    "Jun": 0,
+    "Jul": 0,
+    "Ago": 0,
+    "Sep": 0,
+    "Oct": 0,
+    "Nov": 0,
+    "Dic": 0
+  },
+  "gas": {
+    "Alimentación": 15000,
+    "Transporte": 5000,
+    "Entretenimiento": 8000,
+    "Educación": 3000,
+    "Inversiones": 30000,
+    "Otros": 5000
+  },
+  "metas": [
+    {
+      "nm": "Fondo de emergencia",
+      "ob": 500000,
+      "ac": 120000
+    },
+    {
+      "nm": "Capital USD 1.000",
+      "ob": 1436000,
+      "ac": 359000
+    },
+    {
+      "nm": "Working Holiday Australia",
+      "ob": 2000000,
+      "ac": 50000
+    }
+  ],
+  "ts": "2026-04-15T03:05:10.577Z"
+}
